@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
-import { Search, UserPlus } from 'lucide-react';
+import { Search, UserPlus, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const StudentDetails = ({ onSelectStudent }) => {
   const [students, setStudents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [newStudent, setNewStudent] = useState({
     name: '',
     email: '',
@@ -36,6 +37,17 @@ const StudentDetails = ({ onSelectStudent }) => {
       fetchStudents();
     } catch (error) {
       toast.error('Failed to add student');
+    }
+  };
+
+  const handleDeleteStudent = async (studentId) => {
+    try {
+      await adminApi.deleteStudent(studentId);
+      toast.success('Student deleted successfully');
+      setShowDeleteConfirm(null);
+      fetchStudents();
+    } catch (error) {
+      toast.error('Failed to delete student');
     }
   };
 
@@ -81,7 +93,7 @@ const StudentDetails = ({ onSelectStudent }) => {
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
+                  Actions
                 </th>
               </tr>
             </thead>
@@ -95,12 +107,20 @@ const StudentDetails = ({ onSelectStudent }) => {
                     <div className="text-sm text-gray-500">{student.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => onSelectStudent(student)}
-                      className="text-indigo-600 hover:text-indigo-900"
-                    >
-                      Select
-                    </button>
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={() => onSelectStudent(student)}
+                        className="text-indigo-600 hover:text-indigo-900"
+                      >
+                        Select
+                      </button>
+                      <button
+                        onClick={() => setShowDeleteConfirm(student)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -109,6 +129,7 @@ const StudentDetails = ({ onSelectStudent }) => {
         </div>
       </div>
 
+      {/* Add Student Modal */}
       {showAddForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
@@ -160,6 +181,32 @@ const StudentDetails = ({ onSelectStudent }) => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Delete Student</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to delete {showDeleteConfirm.name}? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowDeleteConfirm(null)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteStudent(showDeleteConfirm._id)}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

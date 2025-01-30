@@ -5,7 +5,7 @@ const connectDB = require("./config/db");
 const adminRoutes = require("./routes/adminRoutes");
 const performanceRoutes = require("./routes/performanceRoutes");
 const studentRoutes = require("./routes/studentRoutes");
-const bodyParser = require("body-parser");
+// const bodyParser = require("body-parser");
 
 dotenv.config();
 connectDB();

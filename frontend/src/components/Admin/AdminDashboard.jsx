@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Route, Routes, Link } from 'react-router-dom';
-import { GraduationCap, Award, UserCircle, BookOpen } from 'lucide-react';
+import { Route, Routes, Link, useNavigate, useLocation } from 'react-router-dom';
+import { GraduationCap, Award, UserCircle, BookOpen, ArrowLeft } from 'lucide-react';
 import AcademicGrades from './AcademicGrades';
 import ExtraCurricular from './ExtraCurricular';
 import TeacherRemarks from './TeacherRemarks';
@@ -8,6 +8,16 @@ import StudentDetails from './StudentDetails';
 
 const AdminDashboard = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleBack = () => {
+    if (selectedStudent) {
+      setSelectedStudent(null);
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -50,6 +60,20 @@ const AdminDashboard = () => {
 
       {/* Main Content */}
       <div className="flex-1 p-8">
+        <div className="mb-6 flex items-center justify-between">
+          <button
+            onClick={handleBack}
+            className="flex items-center text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back
+          </button>
+          {selectedStudent && (
+            <div className="text-gray-600">
+              Selected Student: <span className="font-medium">{selectedStudent.name}</span>
+            </div>
+          )}
+        </div>
         <Routes>
           <Route path="students" element={<StudentDetails onSelectStudent={setSelectedStudent} />} />
           <Route path="academic" element={<AcademicGrades selectedStudent={selectedStudent} />} />

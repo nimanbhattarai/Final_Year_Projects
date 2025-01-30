@@ -21,10 +21,16 @@ api.interceptors.request.use((config) => {
 export const adminApi = {
   login: (credentials) => api.post('/admin/login', credentials),
   getStudents: () => api.get('/admin/students'),
+  registerStudent: (data) => api.post('/student/register', data),
+  deleteStudent: (studentId) => api.delete(`/admin/students/${studentId}`),
   updateStudentData: (data) => api.put('/admin/student/update', data),
+  getStudentGrades: (studentId) => api.get(`/performance/${studentId}`),
   updateAcademicGrades: (data) => api.put('/performance/academic', data),
+  deleteAcademicGrades: (data) => api.delete('/performance/academic', { data }),
   updateExtracurricular: (data) => api.put('/performance/extracurricular', data),
+  deleteExtracurricular: (data) => api.delete('/performance/extracurricular', { data }),
   updateTeacherRemarks: (data) => api.put('/performance/teacher-remarks', data),
+  deleteTeacherRemarks: (data) => api.delete('/performance/teacher-remarks', { data }),
 };
 
 export const studentApi = {

@@ -7,40 +7,26 @@ const studentSchema = mongoose.Schema(
     password: { type: String, required: true },
     performance: {
       academic: {
-        type: Map, // To store years dynamically as keys
-        of: {
-          type: Map,
-          of: [{ subject: String, marks: Number }], // Each semester contains subjects with marks
-        },
-        default: {}, // Default as an empty object
+        type: Object, // Using Map for year-wise academic records
+        of: Object, // Each year holds semester-wise records
+        default: ([]),
       },
       extracurricular: {
         type: Array,
-        default: [], // Default to an empty array
-        items: {
-          activity: String,
-          marks: Number,
-        },
+        default: [],
       },
       teacherRemarks: {
         type: Array,
-        default: [], // Default to an empty array
-        items: {
-          teacher: String,
-          remark: String,
-          marks: Number,
-        },
+        default: [],
       },
     },
     tenthMarks: {
       type: Array,
-      default: [], // Default to an empty array
-      items: { subject: String, marks: Number },
+      default: [],
     },
     twelfthMarks: {
       type: Array,
-      default: [], // Default to an empty array
-      items: { subject: String, marks: Number },
+      default: [],
     },
   },
   { timestamps: true }

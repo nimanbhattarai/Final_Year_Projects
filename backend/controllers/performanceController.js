@@ -2,42 +2,35 @@ const Student = require("../models/Student");
 
 // Add or Update Academic Grades
 const updateAcademicGrades = async (req, res) => {
-    const { studentId, year, semester, grades } = req.body;
-  
-    try {
-      const student = await Student.findById(studentId);
-      if (!student) {
-        return res.status(404).json({ message: "Student not found" });
-      }
-  
-      // Initialize performance.academic if it doesn't exist
-      if (!student.performance.academic) {
-        student.performance.academic = new Map();
-      }
-  
-      // Initialize the year if it doesn't exist
-      if (!student.performance.academic.has(year)) {
-        student.performance.academic.set(year, new Map());
-      }
-  
-      // Get the year Map
-      const yearMap = student.performance.academic.get(year);
-  
-      // Set the semester grades
-      yearMap.set(semester, grades);
-  
-      // Update the year Map
-      student.performance.academic.set(year, yearMap);
-  
-      // Save the updated student record
-      await student.save();
-  
-      res.status(200).json({ message: "Academic grades updated", academic: student.performance.academic });
-    } catch (error) {
-      res.status(500).json({ message: error.message });
+  const { studentId, year, semester, grades } = req.body;
+
+  try {
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
     }
-  };
-  
+
+    // Initialize performance.academic if it doesn't exist
+    if (!student.performance.academic) {
+      student.performance.academic = {};
+    }
+
+    // Initialize the year if it doesn't exist
+    if (!student.performance.academic[year]) {
+      student.performance.academic[year] = {};
+    }
+
+    // Set the semester grades
+    student.performance.academic[year][semester] = grades;
+
+    // Save the updated student record
+    await student.save();
+
+    res.status(200).json({ message: "Academic grades updated", academic: student.performance.academic });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Add or Update Extracurricular Grades
 const updateExtracurricularGrades = async (req, res) => {
