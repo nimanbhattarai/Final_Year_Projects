@@ -1,5 +1,30 @@
 const Student = require("../models/Student");
 
+
+const deleteAcademicGrades = async (req, res) => {
+  const { studentId, year, semester } = req.body;
+  if (!studentId || !year || !semester) {
+    return res.status(400).json({ message: "Missing required fields" });
+  }
+  try {
+    // console.log("inside delete performance route")
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    if (student.performance.academic.has(year)) {
+      student.performance.academic.get(year).semester.delete(semester);
+      await student.save();
+      return res.status(200).json({ message: "Academic grades deleted" });
+    }
+    return res.status(404).json({ message: "No grades found for the specified year and semester" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Add or Update Academic Grades
 const updateAcademicGrades = async (req, res) => {
   const { studentId, year, semester, grades } = req.body;
@@ -63,7 +88,7 @@ const updateExtracurricularGrades = async (req, res) => {
 // Add or Update Teacher Remarks
 const updateTeacherRemarks = async (req, res) => {
   const { studentId, teacherName, remark, grade } = req.body;
-console.log("Hii",req.body)
+  console.log("Hii", req.body)
   try {
     const student = await Student.findById(studentId);
     if (!student) {
@@ -147,4 +172,5 @@ module.exports = {
   updateTeacherRemarks,
   getPerformance,
   getBestPerformingStudent,
+  deleteAcademicGrades
 };

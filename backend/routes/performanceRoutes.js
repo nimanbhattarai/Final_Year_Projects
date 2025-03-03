@@ -5,12 +5,14 @@ const {
   updateTeacherRemarks,
   getPerformance,
   getBestPerformingStudent,
+  deleteAcademicGrades
 } = require("../controllers/performanceController");
 
 const router = express.Router();
 
 // Academic Grades
 router.put("/academic", updateAcademicGrades);
+router.delete("/academic", deleteAcademicGrades);
 
 // Extracurricular Grades
 router.put("/extracurricular", updateExtracurricularGrades);
