@@ -7,16 +7,26 @@ const deleteAcademicGrades = async (req, res) => {
     return res.status(400).json({ message: "Missing required fields" });
   }
   try {
-    // console.log("inside delete performance route")
     const student = await Student.findById(studentId);
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
     if (student.performance.academic.has(year)) {
-      student.performance.academic.get(year).semester.delete(semester);
-      await student.save();
-      return res.status(200).json({ message: "Academic grades deleted" });
+      // Get the year data
+      const yearData = student.performance.academic.get(year);
+      
+      // Check if semester exists
+      if (yearData.semester.has(semester)) {
+        // Delete the semester
+        yearData.semester.delete(semester);
+        
+        // Mark the field as modified to ensure Mongoose saves the changes
+        student.markModified('performance.academic');
+        
+        await student.save();
+        return res.status(200).json({ message: "Academic grades deleted" });
+      }
     }
     return res.status(404).json({ message: "No grades found for the specified year and semester" });
 
