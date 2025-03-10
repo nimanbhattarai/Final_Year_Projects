@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
 import { Snackbar, Alert } from '@mui/material';
-import { Trash2 } from 'lucide-react';
+import { Trash2, MessageCircle, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const TeacherRemarks = ({ selectedStudent }) => {
@@ -112,8 +112,13 @@ const TeacherRemarks = ({ selectedStudent }) => {
 
   if (!selectedStudent) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Please select a student from the Student Details section first.</p>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="bg-indigo-50 rounded-full p-4 mb-4">
+          <MessageCircle className="h-8 w-8 text-indigo-500" />
+        </div>
+        <p className="text-gray-600 text-center">
+          Please select a student from the Student Details section first.
+        </p>
       </div>
     );
   }
@@ -121,102 +126,148 @@ const TeacherRemarks = ({ selectedStudent }) => {
   if (loading && existingRemarks.length === 0) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Existing Remarks Section */}
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Teacher Remarks</h2>
+    <div className="space-y-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Teacher Remarks</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Manage teacher feedback for {selectedStudent.name}
+              </p>
+            </div>
+            <div className="flex items-center bg-indigo-50 px-3 py-1.5 rounded-lg">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
+                {selectedStudent.name.charAt(0)}
+              </div>
+              <span className="text-sm font-medium text-indigo-800">{selectedStudent.name}</span>
+            </div>
+          </div>
+        </div>
 
-        {existingRemarks.length > 0 ? (
+        <div className="p-6">
+          {/* Existing Remarks Section */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Existing Remarks</h3>
-            <div className="space-y-4">
-              {existingRemarks.map((remark, index) => (
-                <div key={index} className="bg-gray-50 p-4 rounded-lg border relative">
-                  <div className="flex justify-between flex-col gap-2 items-start">
-                    <div className='flex flex-row gap-2'>
-                      <h4 className="font-medium">{remark.teacherName}</h4>
-                      <div className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-sm font-medium">
-                        Grade: {remark.grade}
+            {existingRemarks.length > 0 ? (
+              <div>
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+                  Existing Remarks
+                </h3>
+                <div className="space-y-4">
+                  {existingRemarks.map((remark, index) => (
+                    <div 
+                      key={index} 
+                      className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
+                    >
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="flex items-center space-x-3">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                              {remark.teacherName.charAt(0)}
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-900">{remark.teacherName}</h4>
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                                Grade: {remark.grade}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleDeleteRemark(index)}
+                            className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200"
+                            title="Delete Remark"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
+                          {remark.remark}
+                        </p>
                       </div>
                     </div>
-                    <div>
-                      <p className="text-gray-700 mt-1">{remark.remark}</p>
-                    </div>
-                  </div>
-                  <div>
-                    <button
-                      onClick={() => handleDeleteRemark(index)}
-                      className="absolute top-2 right-2 text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                      title="Delete Remark"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+                <MessageCircle className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600">No remarks added yet for this student.</p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-4 mb-6">
-            <p className="text-gray-600">No remarks added yet for this student.</p>
+
+          {/* Add New Remark Form */}
+          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Remark</h3>
+            <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Teacher Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Enter teacher's name"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                  value={formData.teacherName}
+                  onChange={(e) => setFormData({ ...formData, teacherName: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Remark
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Enter your feedback..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                  value={formData.remark}
+                  onChange={(e) => setFormData({ ...formData, remark: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Grade (0-10)
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  max="10"
+                  placeholder="Enter grade"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200"
+                  value={formData.grade}
+                  onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
+                />
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="submit"
+                  className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 font-medium transition-colors duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                >
+                  {submitting ? (
+                    'Adding...'
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Remark
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-
-        {/* Add New Remark Form */}
-        <div className="border-t pt-6">
-          <h3 className="text-lg font-semibold mb-4">Add New Remark</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-gray-700 mb-1">Teacher Name</label>
-              <input
-                type="text"
-                required
-                className="w-full p-2 border rounded-md"
-                value={formData.teacherName}
-                onChange={(e) => setFormData({ ...formData, teacherName: e.target.value })}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-1">Remark</label>
-              <textarea
-                required
-                rows={4}
-                className="w-full p-2 border rounded-md"
-                value={formData.remark}
-                onChange={(e) => {
-                  setFormData({ ...formData, remark: e.target.value })
-                }}
-              />
-            </div>
-
-            <div>
-              <label className="block text-gray-700 mb-1">Grade</label>
-              <input
-                type="number"
-                required
-                min="0"
-                max="10"
-                className="w-full p-2 border rounded-md"
-                value={formData.grade}
-                onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-indigo-300"
-              disabled={submitting}
-            >
-              {submitting ? 'Adding...' : 'Add Remark'}
-            </button>
-          </form>
         </div>
       </div>
 

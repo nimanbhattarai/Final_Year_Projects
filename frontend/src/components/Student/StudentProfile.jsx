@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { studentApi } from "../../services/api";
-import { User, Book, Award, MessageSquare } from "lucide-react";
+import { User, Book, Award, MessageSquare, GraduationCap } from "lucide-react";
 import toast from "react-hot-toast";
 
 const StudentProfile = () => {
@@ -44,7 +44,11 @@ const StudentProfile = () => {
   };
 
   if (!profile) {
-    return <div className="animate-pulse">Loading profile...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
   }
 
   // Ensure performance fields are properly handled
@@ -53,124 +57,157 @@ const StudentProfile = () => {
   const teacherRemarks = profile.performance?.teacherRemarks || [];
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
-        <div className="bg-indigo-600 px-6 py-4">
+    <div className="max-w-5xl mx-auto p-6">
+      {/* Profile Header */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-8">
           <div className="flex items-center space-x-4">
-            <User className="h-12 w-12 text-white" />
+            <div className="p-3 bg-white/10 rounded-lg">
+              <User className="h-12 w-12 text-white" />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-white">{profile.name}</h1>
-              <p className="text-indigo-100">{profile.email}</p>
+              <h1 className="text-2xl font-bold text-white mb-1">{profile.name}</h1>
+              <p className="text-indigo-100 flex items-center">
+                <GraduationCap className="h-4 w-4 mr-2" />
+                {profile.email}
+              </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="p-6 space-y-6">
-          {/* Academic Performance Section */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+      <div className="grid gap-6">
+        {/* Academic Performance Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center">
               <Book className="h-5 w-5 mr-2 text-indigo-600" />
               Academic Performance
             </h2>
-            <div className="space-y-4">
-              {academicPerformance.length > 0 ? (
-                academicPerformance.map((yearData) => (
-                  <div key={yearData.year} className="border rounded-lg p-4">
-                    <h3 className="font-medium text-gray-900 mb-2">
-                      Year {yearData.year}
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          </div>
+
+          <div className="p-6">
+            {academicPerformance.length > 0 ? (
+              <div className="space-y-6">
+                {academicPerformance.map((yearData) => (
+                  <div key={yearData.year} className="border border-gray-200 rounded-lg overflow-hidden">
+                    <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                      <h3 className="font-semibold text-gray-900">Year {yearData.year}</h3>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-4 p-4">
                       {yearData.semesters.map((semesterData) => (
                         <div
                           key={semesterData.semester}
-                          className="bg-gray-50 p-3 rounded"
+                          className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
                         >
-                          <h4 className="font-medium mb-2">
+                          <h4 className="font-medium text-gray-900 mb-3 pb-2 border-b border-gray-100">
                             Semester {semesterData.semester}
                           </h4>
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             {semesterData.subjects.length > 0 ? (
                               semesterData.subjects.map((subject, index) => (
                                 <div
                                   key={index}
-                                  className="flex justify-between"
+                                  className="flex justify-between items-center py-1 px-2 rounded-lg hover:bg-gray-50"
                                 >
-                                  <span className="text-gray-600">
-                                    {subject.subject}
-                                  </span>
-                                  <span className="font-medium">
+                                  <span className="text-gray-700">{subject.subject}</span>
+                                  <span className="font-medium text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded">
                                     {subject.marks}
                                   </span>
                                 </div>
                               ))
                             ) : (
-                              <p className="text-gray-600">
-                                No subjects available
-                              </p>
+                              <p className="text-gray-500 text-sm italic">No subjects available</p>
                             )}
                           </div>
                         </div>
                       ))}
                     </div>
                   </div>
-                ))
-              ) : (
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Book className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                 <p className="text-gray-600">No academic data available.</p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
+        </div>
 
-          {/* Extracurricular Activities Section */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+        {/* Extracurricular Activities Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center">
               <Award className="h-5 w-5 mr-2 text-indigo-600" />
               Extra-Curricular Activities
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {extracurricularActivities.length > 0 ? (
-                extracurricularActivities.map((activity, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                    <h3 className="font-medium text-gray-900">
-                      {activity.activity}
-                    </h3>
-                    <p className="text-gray-600 mt-1">
-                      Grade: {activity.grade}
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-600">
-                  No extracurricular data available.
-                </p>
-              )}
-            </div>
           </div>
 
-          {/* Teacher Remarks Section */}
-          <div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-4 flex items-center">
+          <div className="p-6">
+            {extracurricularActivities.length > 0 ? (
+              <div className="grid md:grid-cols-2 gap-4">
+                {extracurricularActivities.map((activity, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
+                  >
+                    <div className="flex justify-between items-start">
+                      <h3 className="font-medium text-gray-900">{activity.activity}</h3>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                        Grade: {activity.grade}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Award className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-gray-600">No extracurricular data available.</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Teacher Remarks Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
+            <h2 className="text-xl font-bold text-gray-900 flex items-center">
               <MessageSquare className="h-5 w-5 mr-2 text-indigo-600" />
               Teacher Remarks
             </h2>
-            <div className="space-y-4">
-              {teacherRemarks.length > 0 ? (
-                teacherRemarks.map((remark, index) => (
-                  <div key={index} className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-medium text-gray-900">
-                        {remark.teacherName}
-                      </h3>
-                      <span className="bg-indigo-100 text-indigo-800 text-sm px-2 py-1 rounded">
+          </div>
+
+          <div className="p-6">
+            {teacherRemarks.length > 0 ? (
+              <div className="space-y-4">
+                {teacherRemarks.map((remark, index) => (
+                  <div
+                    key={index}
+                    className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+                          {remark.teacherName.charAt(0)}
+                        </div>
+                        <h3 className="font-medium text-gray-900">{remark.teacherName}</h3>
+                      </div>
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
                         Grade: {remark.grade}
                       </span>
                     </div>
-                    <p className="text-gray-600">{remark.remark}</p>
+                    <p className="text-gray-600 bg-gray-50 p-3 rounded-lg">{remark.remark}</p>
                   </div>
-                ))
-              ) : (
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <MessageSquare className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                 <p className="text-gray-600">No teacher remarks available.</p>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

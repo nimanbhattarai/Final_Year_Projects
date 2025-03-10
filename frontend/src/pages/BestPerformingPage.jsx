@@ -191,8 +191,8 @@ const BestPerformingPage = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 bg-gradient-to-b from-indigo-50 to-white min-h-screen">
-      <div className="mb-12 text-center">
-        <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-4 leading-tight">
+      <div className="mb-12 text-center mt-20 pt-12">
+        <h1 className="text-5xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-4 leading-tight">
           Student Performance Rankings
         </h1>
         <p className="text-lg text-gray-600 max-w-3xl mx-auto">

@@ -176,11 +176,14 @@ const YearDetails = () => {
 
   if (!student) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Student information is missing. Please go back and select a student.</p>
+      <div className="flex flex-col items-center justify-center py-16">
+        <div className="bg-red-50 rounded-full p-4 mb-4">
+          <ArrowLeft className="h-8 w-8 text-red-500" />
+        </div>
+        <p className="text-gray-600 mb-4 text-center">Student information is missing. Please go back and select a student.</p>
         <button
           onClick={() => navigate('/admin/students')}
-          className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200"
         >
           Go to Students
         </button>
@@ -191,7 +194,7 @@ const YearDetails = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -200,153 +203,168 @@ const YearDetails = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
         <button
           onClick={handleBack}
-          className="flex items-center text-gray-600 hover:text-gray-900"
+          className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors duration-200"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
-          Back to Academic Years
+          <span className="font-medium">Back to Academic Years</span>
         </button>
-        <div>
-          <h2 className="text-xl font-bold">
+        <div className="flex items-center space-x-3">
+          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
+            {student?.name?.charAt(0) || 'S'}
+          </div>
+          <h2 className="text-lg font-bold text-gray-900">
             {student?.name} - Year {year}
           </h2>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Semester Details</h2>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
+          <h2 className="text-xl font-bold text-gray-900">Semester Details</h2>
+        </div>
         
-        {/* Existing Semesters Display */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4">Existing Semesters</h3>
-          {Object.keys(semesters).length === 0 ? (
-            <p className="text-gray-600">No semesters added yet for Year {year}.</p>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2">
-              {Object.entries(semesters).map(([semester, subjects]) => (
-                <div key={semester} className="bg-gray-50 p-5 rounded-lg border">
-                  <div className="flex justify-between items-center mb-4">
-                    <h4 className="font-medium text-lg">Semester {semester}</h4>
-                    <button
-                      onClick={() => handleDeleteSemester(semester)}
-                      className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                      title="Delete Semester"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  
-                  {Array.isArray(subjects) && subjects.length > 0 ? (
-                    <div className="space-y-2">
-                      <div className="grid grid-cols-2 font-medium text-gray-600 mb-1">
-                        <span>Subject</span>
-                        <span className="text-right">Marks</span>
-                      </div>
-                      <div className="border-t border-gray-200 pt-2">
-                        {subjects.map((subject, idx) => (
-                          <div key={idx} className="grid grid-cols-2 py-1 text-sm">
-                            <span className="truncate">{subject.subject}</span>
-                            <span className="text-right font-medium">{subject.marks}</span>
-                          </div>
-                        ))}
+        <div className="p-6">
+          {/* Existing Semesters Display */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Existing Semesters</h3>
+            {Object.keys(semesters).length === 0 ? (
+              <div className="bg-gray-50 rounded-lg p-6 text-center">
+                <p className="text-gray-600">No semesters added yet for Year {year}.</p>
+              </div>
+            ) : (
+              <div className="grid gap-6 md:grid-cols-2">
+                {Object.entries(semesters).map(([semester, subjects]) => (
+                  <div key={semester} className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+                    <div className="bg-gradient-to-r from-indigo-50 to-white px-4 py-3 border-b border-gray-200">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-semibold text-gray-900">Semester {semester}</h4>
+                        <button
+                          onClick={() => handleDeleteSemester(semester)}
+                          className="text-gray-400 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition-colors duration-200"
+                          title="Delete Semester"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <p className="text-gray-500 italic">No subjects available</p>
-                  )}
+                    
+                    <div className="p-4">
+                      {Array.isArray(subjects) && subjects.length > 0 ? (
+                        <div className="space-y-2">
+                          <div className="grid grid-cols-2 text-sm font-medium text-gray-500">
+                            <span>Subject</span>
+                            <span className="text-right">Marks</span>
+                          </div>
+                          <div className="border-t border-gray-100 pt-2">
+                            {subjects.map((subject, idx) => (
+                              <div key={idx} className="grid grid-cols-2 py-1.5 text-sm hover:bg-gray-50 rounded-md px-2">
+                                <span className="text-gray-900">{subject.subject}</span>
+                                <span className="text-right font-medium text-indigo-600">{subject.marks}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-gray-500 italic text-sm">No subjects available</p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add New Semester Form */}
+          {availableSemesters.length > 0 ? (
+            <div className="border-t border-gray-200 pt-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Semester</h3>
+                
+                <div className="max-w-md">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Select Semester</label>
+                  <select
+                    value={formData.semester}
+                    onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
+                    className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    required
+                  >
+                    <option value="">Select a semester</option>
+                    {availableSemesters.map((sem) => (
+                      <option key={sem} value={sem}>
+                        Semester {sem}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-              ))}
+
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-700">Subjects</label>
+                  
+                  {formData.subjects.map((subject, index) => (
+                    <div key={index} className="flex items-center space-x-3 group">
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          placeholder="Subject Name"
+                          value={subject.name}
+                          onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
+                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                      <div className="w-28">
+                        <input
+                          type="number"
+                          placeholder="Marks"
+                          min="0"
+                          max="100"
+                          value={subject.marks}
+                          onChange={(e) => handleSubjectChange(index, 'marks', e.target.value)}
+                          className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                          required
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSubject(index)}
+                        className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all duration-200"
+                        disabled={formData.subjects.length === 1}
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  ))}
+
+                  <button
+                    type="button"
+                    onClick={handleAddSubject}
+                    className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-md transition-colors duration-200"
+                  >
+                    <Plus className="h-4 w-4 mr-1.5" />
+                    Add Subject
+                  </button>
+                </div>
+
+                <div className="pt-4">
+                  <button
+                    type="submit"
+                    className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:ring-4 focus:ring-indigo-200 font-medium transition-colors duration-200 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    disabled={submitting || !formData.semester || formData.subjects.some(s => !s.name.trim() || !s.marks)}
+                  >
+                    {submitting ? 'Saving...' : 'Save Grades'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div className="border-t border-gray-200 pt-6">
+              <p className="text-gray-600">All semesters for Year {year} have been added.</p>
             </div>
           )}
         </div>
-
-        {/* Add New Semester Form */}
-        {availableSemesters.length > 0 ? (
-          <form onSubmit={handleSubmit} className="space-y-6 border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Add New Semester</h3>
-            
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Select Semester</label>
-              <select
-                value={formData.semester}
-                onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                className="w-full p-2 border rounded-md"
-                required
-              >
-                <option value="">Select a semester</option>
-                {availableSemesters.map((sem) => (
-                  <option key={sem} value={sem}>
-                    Semester {sem}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="space-y-4">
-              <label className="block text-gray-700">Subjects</label>
-              
-              {formData.subjects.map((subject, index) => (
-                <div key={index} className="flex items-center space-x-2">
-                  <div className="flex-1">
-                    <input
-                      type="text"
-                      placeholder="Subject Name"
-                      value={subject.name}
-                      onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
-                      className="w-full p-2 border rounded-md"
-                      required
-                    />
-                  </div>
-                  <div className="w-24">
-                    <input
-                      type="number"
-                      placeholder="Marks"
-                      min="0"
-                      max="100"
-                      value={subject.marks}
-                      onChange={(e) => handleSubjectChange(index, 'marks', e.target.value)}
-                      className="w-full p-2 border rounded-md"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSubject(index)}
-                    className="text-red-600 hover:text-red-800 p-1"
-                    disabled={formData.subjects.length === 1}
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              ))}
-
-              <button
-                type="button"
-                onClick={handleAddSubject}
-                className="flex items-center text-indigo-600 hover:text-indigo-800"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add Subject
-              </button>
-            </div>
-
-            <div className="pt-4">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-indigo-300"
-                disabled={submitting || !formData.semester || formData.subjects.some(s => !s.name.trim() || !s.marks)}
-              >
-                {submitting ? 'Saving...' : 'Save Grades'}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <div className="border-t pt-6">
-            <p className="text-gray-600">All semesters for Year {year} have been added.</p>
-          </div>
-        )}
       </div>
     </div>
   );

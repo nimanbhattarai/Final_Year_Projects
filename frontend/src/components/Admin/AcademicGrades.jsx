@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
-import { Trash2, Plus, ChevronRight, ArrowLeft } from 'lucide-react';
+import { Trash2, Plus, ChevronRight, Calendar, PlusCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -108,8 +108,14 @@ const AcademicGrades = ({ selectedStudent }) => {
 
   if (!selectedStudent) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">Please select a student from the Student Details section first.</p>
+      <div className="flex flex-col items-center justify-center py-16 px-4">
+        <div className="bg-indigo-50 rounded-full p-4 mb-4">
+          <Calendar className="h-8 w-8 text-indigo-500" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No Student Selected</h3>
+        <p className="text-gray-600 text-center max-w-md">
+          Please select a student from the Student Details section first to view and manage their academic records.
+        </p>
       </div>
     );
   }
@@ -117,7 +123,7 @@ const AcademicGrades = ({ selectedStudent }) => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-indigo-500"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
@@ -126,75 +132,133 @@ const AcademicGrades = ({ selectedStudent }) => {
   const availableYears = ['1', '2', '3', '4'].filter(year => !years.includes(year));
 
   return (
-    <div className="space-y-8">
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Academic Years</h2>
-        
-        {years.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-600">No academic data available for this student.</p>
-            <p className="text-gray-500 mt-2">Add a new academic year to get started.</p>
+    <div>
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Academic Records</h2>
+            <p className="text-gray-500 mt-1">
+              Manage {selectedStudent.name}'s academic performance by year
+            </p>
           </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {years.map(year => {
-              const yearData = existingGrades[year] || {};
-              const semesterData = yearData.semester || {};
-              const semesterCount = Object.keys(semesterData).filter(sem => !sem.startsWith('$')).length;
-              
-              return (
-                <div key={year} className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <div className="p-4 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold">Year {year}</h3>
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => handleDeleteYear(year)}
-                        className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
-                        title="Delete Year"
-                      >
-                        <Trash2 className="h-5 w-5" />
-                      </button>
-                      <Link
-                        to={`/admin/academic/${year}`}
-                        state={{ student: selectedStudent, yearData: existingGrades[year] }}
-                        className="text-indigo-600 hover:text-indigo-800 p-1 rounded-full hover:bg-indigo-50"
-                        title="View Details"
-                      >
-                        <ChevronRight className="h-5 w-5" />
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="px-4 pb-4">
-                    <p className="text-sm text-gray-600">
-                      {semesterCount} semester(s)
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
+          
+          {selectedStudent && (
+            <div className="flex items-center bg-indigo-50 px-3 py-1.5 rounded-lg">
+              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
+                {selectedStudent.name ? selectedStudent.name.charAt(0) : 'S'}
+              </div>
+              <span className="text-sm font-medium text-indigo-800">{selectedStudent.name}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      
+      {years.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gray-50 mb-4">
+            <Calendar className="h-8 w-8 text-gray-400" />
           </div>
-        )}
-
-        {/* Add New Year Section */}
-        {availableYears.length > 0 && (
-          <div className="mt-8 pt-6 border-t">
-            <h3 className="text-lg font-semibold mb-4">Add New Academic Year</h3>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Academic Data Available</h3>
+          <p className="text-gray-500 mb-6 max-w-md mx-auto">
+            There are no academic records available for this student yet. Add a new academic year to get started.
+          </p>
+          {availableYears.length > 0 && (
+            <div className="inline-flex flex-wrap justify-center gap-3 mt-2">
               {availableYears.map(year => (
                 <Link
                   key={year}
                   to={`/admin/academic/${year}`}
                   state={{ student: selectedStudent, yearData: {} }}
-                  className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition-colors"
                 >
-                  <Plus className="h-5 w-5 mr-2 text-indigo-600" />
-                  <span className="font-medium text-indigo-600">Year {year}</span>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Add Year {year}
                 </Link>
               ))}
             </div>
+          )}
+        </div>
+      ) : (
+        <div className="space-y-8">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {years.map(year => {
+              const yearData = existingGrades[year] || {};
+              const semesterData = yearData.semester || {};
+              const semesters = Object.keys(semesterData).filter(sem => !sem.startsWith('$'));
+              const semesterCount = semesters.length;
+              
+              return (
+                <div key={year} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-all duration-200 group">
+                  <div className="border-b border-gray-100">
+                    <div className="bg-gradient-to-r from-indigo-50 to-purple-50 px-5 py-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-900">Year {year}</h3>
+                        <div className="flex space-x-1">
+                          <button
+                            onClick={() => handleDeleteYear(year)}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete Year"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="p-5">
+                    <div className="mb-3">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        {semesterCount} {semesterCount === 1 ? 'Semester' : 'Semesters'}
+                      </span>
+                    </div>
+                    
+                    {semesterCount > 0 && (
+                      <div className="space-y-2 mb-4">
+                        {semesters.map(sem => (
+                          <div key={sem} className="text-sm text-gray-600 flex items-center">
+                            <div className="w-2 h-2 rounded-full bg-indigo-400 mr-2"></div>
+                            Semester {sem}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <Link
+                      to={`/admin/academic/${year}`}
+                      state={{ student: selectedStudent, yearData: existingGrades[year] }}
+                      className="mt-2 inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800 group-hover:underline"
+                    >
+                      View details
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        )}
-      </div>
+
+          {/* Add New Year Section */}
+          {availableYears.length > 0 && (
+            <div className="mt-8 pt-5 border-t border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Academic Year</h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                {availableYears.map(year => (
+                  <Link
+                    key={year}
+                    to={`/admin/academic/${year}`}
+                    state={{ student: selectedStudent, yearData: {} }}
+                    className="flex items-center justify-center p-4 bg-white border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200"
+                  >
+                    <Plus className="h-5 w-5 mr-2 text-indigo-500" />
+                    <span className="font-medium text-indigo-600">Year {year}</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

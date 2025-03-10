@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { UserCircle } from 'lucide-react';
+import { useNavigate, Link } from 'react-router-dom';
+import { UserCircle, AtSign, Lock, ArrowRight, ChevronLeft } from 'lucide-react';
 import { studentApi } from '../../services/api';
 import { Snackbar, Alert } from '@mui/material';
 
@@ -10,6 +10,7 @@ const StudentLogin = () => {
     email: '',
     password: '',
   });
+  const [loading, setLoading] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -23,62 +24,187 @@ const StudentLogin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await studentApi.login(formData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', 'student');
       localStorage.setItem('studentId', response.data.studentId);
       setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
-      navigate('/student');
+      setTimeout(() => navigate('/student'), 500);
     } catch (error) {
       setSnackbar({ open: true, message: 'Invalid credentials', severity: 'error' });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="mx-auto h-12 w-12 flex items-center justify-center rounded-full bg-indigo-100">
-            <UserCircle className="h-6 w-6 text-indigo-600" />
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Student Login
-          </h2>
+    <div className="min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+      {/* Left side - decorative section */}
+      <div className="hidden md:flex md:w-1/2 bg-indigo-600 p-10 text-white flex-col justify-between relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full opacity-10">
+          <div className="absolute top-10 left-10 w-40 h-40 rounded-full bg-white"></div>
+          <div className="absolute bottom-40 right-10 w-20 h-20 rounded-full bg-white"></div>
+          <div className="absolute top-1/2 left-1/3 w-60 h-60 rounded-full bg-white opacity-20"></div>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <input
-                type="email"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              />
+        
+        <div className="relative z-10">
+          <Link to="/" className="flex items-center space-x-2 mb-16 text-white hover:text-indigo-200 transition-colors">
+            <ChevronLeft className="h-5 w-5" />
+            <span>Back to Home</span>
+          </Link>
+          
+          <h1 className="text-4xl font-bold mb-4">Welcome Back, Scholar!</h1>
+          <p className="text-indigo-200 mb-8 text-lg">Sign in to access your academic dashboard and track your educational progress.</p>
+          
+          <div className="space-y-6">
+            <div className="flex items-start space-x-3">
+              <div className="bg-indigo-500 p-1 rounded-md mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium">Track Academic Performance</h3>
+                <p className="text-indigo-200 text-sm">View your grades and progress in real-time</p>
+              </div>
             </div>
-            <div>
-              <input
-                type="password"
-                required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              />
+            
+            <div className="flex items-start space-x-3">
+              <div className="bg-indigo-500 p-1 rounded-md mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium">Access Teacher Feedback</h3>
+                <p className="text-indigo-200 text-sm">Read personalized comments from your educators</p>
+              </div>
             </div>
+            
+            {/* <div className="flex items-start space-x-3">
+              <div className="bg-indigo-500 p-1 rounded-md mt-0.5">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-medium">Monitor Attendance Records</h3>
+                <p className="text-indigo-200 text-sm">Stay on top of your attendance history</p>
+              </div>
+            </div> */}
           </div>
+        </div>
+        
+        <div className="relative z-10 text-sm text-indigo-200">
+          Scholarly — Empowering educational excellence
+        </div>
+      </div>
+      
+      {/* Right side - login form */}
+      <div className="w-full md:w-1/2 flex items-center justify-center p-8">
+        <div className="max-w-md w-full space-y-10">
+          <div className="text-center">
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white mb-6 shadow-lg transform transition-transform duration-300 hover:scale-110">
+              <UserCircle className="h-8 w-8" />
+            </div>
+            <h2 className="text-3xl font-extrabold text-gray-900 mb-1">
+              Student Login
+            </h2>
+            <p className="text-gray-500">Enter your credentials to access your account</p>
+          </div>
+          
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <AtSign className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out sm:text-sm"
+                    placeholder="student@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  {/* <a href="#" className="text-sm text-indigo-600 hover:text-indigo-500">
+                    Forgot password?
+                  </a> */}
+                </div>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    type="password"
+                    required
+                    className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out sm:text-sm"
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                  Remember me
+                </label>
+              </div>
+            </div>
 
-          <div>
-            <button
-              type="submit"
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Sign in
-            </button>
-          </div>
-        </form>
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-md transition-all duration-300 transform hover:-translate-y-0.5"
+              >
+                {loading ? (
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : (
+                  <span className="absolute left-0 inset-y-0 flex items-center pl-3">
+                    <ArrowRight className="h-5 w-5 text-indigo-400 group-hover:text-indigo-300" />
+                  </span>
+                )}
+                {loading ? 'Signing in...' : 'Sign in to Student Panel'}
+              </button>
+            </div>
+          </form>
+
+          {/* <div className="text-center mt-6">
+            <p className="text-sm text-gray-600">
+              Don't have an account?{' '}
+              <Link to="/" className="font-medium text-indigo-600 hover:text-indigo-500">
+                Contact your administrator
+              </Link>
+            </p>
+          </div> */}
+        </div>
 
         {/* Snackbar Notification */}
         <Snackbar
