@@ -19,7 +19,7 @@ const Navbar = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <GraduationCap className="h-8 w-8" />
-              <span className="font-bold text-xl">College Website</span>
+              <span className="font-bold text-xl">Scholarly</span>
             </Link>
           </div>
 

@@ -1,99 +1,108 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
-import { Trash2, Plus } from 'lucide-react';
+import { Trash2, Plus, ChevronRight, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Link, useNavigate } from 'react-router-dom';
 
 const AcademicGrades = ({ selectedStudent }) => {
-  const [formData, setFormData] = useState({
-    year: '1',
-    semester: '1',
-    subjects: [{ name: '', marks: '' }],
-  });
-  const [existingGrades, setExistingGrades] = useState(null);
+  const [existingGrades, setExistingGrades] = useState({});
   const [loading, setLoading] = useState(true);
-
-  const years = ['1', '2', '3', '4'];
-  const semesters = ['1', '2'];
+  const [years, setYears] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (selectedStudent) {
+    if (selectedStudent && selectedStudent._id) {
       fetchExistingGrades();
+    } else {
+      setLoading(false);
     }
   }, [selectedStudent]);
 
   const fetchExistingGrades = async () => {
     try {
+      setLoading(true);
       const response = await adminApi.getStudentGrades(selectedStudent._id);
-      setExistingGrades(response.data.performance.academic || {});
-      console.log("HAH", response.data.performance.academic)
+      
+      // Ensure we have valid data
+      const academicData = response.data.performance?.academic || {};
+      
+      // Process the data to handle MongoDB Map structure
+      const processedData = {};
+      
+      // Extract years from the data and sort them numerically
+      const yearsList = Object.keys(academicData)
+        .filter(key => !key.startsWith('$') && key !== 'toJSON') // Filter out Mongoose internals
+        .sort((a, b) => Number(a) - Number(b));
+      
+      // Process each year's data
+      yearsList.forEach(year => {
+        const yearData = academicData[year];
+        if (yearData && yearData.semester) {
+          processedData[year] = {
+            semester: {}
+          };
+          
+          // Process semester data
+          Object.keys(yearData.semester)
+            .filter(sem => !sem.startsWith('$') && sem !== 'toJSON')
+            .forEach(sem => {
+              processedData[year].semester[sem] = yearData.semester[sem];
+            });
+        }
+      });
+      
+      setExistingGrades(processedData);
+      setYears(yearsList);
     } catch (error) {
+      console.error('Error fetching grades:', error);
       toast.error('Failed to fetch existing grades');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddSubject = () => {
-    setFormData({
-      ...formData,
-      subjects: [...formData.subjects, { name: '', marks: '' }],
-    });
-  };
-
-  const handleRemoveSubject = (index) => {
-    const newSubjects = formData.subjects.filter((_, i) => i !== index);
-    setFormData({ ...formData, subjects: newSubjects });
-  };
-
-  const handleSubjectChange = (index, field, value) => {
-    const newSubjects = [...formData.subjects];
-    newSubjects[index][field] = value;
-    setFormData({ ...formData, subjects: newSubjects });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!selectedStudent) {
-      toast.error('Please select a student first');
+  const handleDeleteYear = async (year) => {
+    if (!window.confirm(`Are you sure you want to delete all data for Year ${year}?`)) {
       return;
     }
 
     try {
-      const data = {
-        studentId: selectedStudent._id,
-        year: formData.year,
-        semester: formData.semester,
-        grades: formData.subjects.map((s) => ({ subject: s.name, marks: Number(s.marks) })),
+      setLoading(true);
+      
+      // Get all semesters for this year
+      const yearData = existingGrades[year] || {};
+      const semesterData = yearData.semester || {};
+      const semesters = Object.keys(semesterData).filter(sem => !sem.startsWith('$'));
+      
+      if (semesters.length === 0) {
+        toast.error('No semesters found for this year');
+        setLoading(false);
+        return;
       }
-      console.log(data)
-      await adminApi.updateAcademicGrades(data);
-      toast.success('Grades updated successfully');
-      fetchExistingGrades();
-      setFormData({
-        year: '1',
-        semester: '1',
-        subjects: [{ name: '', marks: '' }],
-      });
+      
+      // Delete each semester
+      for (const semester of semesters) {
+        await adminApi.deleteAcademicGrades({
+          studentId: selectedStudent._id,
+          year,
+          semester,
+        });
+      }
+      
+      toast.success(`Year ${year} data deleted successfully`);
+      
+      // Update local state
+      const updatedGrades = { ...existingGrades };
+      delete updatedGrades[year];
+      setExistingGrades(updatedGrades);
+      
+      const updatedYears = years.filter(y => y !== year);
+      setYears(updatedYears);
     } catch (error) {
-      toast.error('Failed to update grades');
-    }
-  };
-
-  const handleDeleteGrades = async (year, semester) => {
-    if (!window.confirm('Are you sure you want to delete these grades?')) {
-      return;
-    }
-
-    try {
-      await adminApi.deleteAcademicGrades({
-        studentId: selectedStudent._id,
-        year,
-        semester,
-      });
-      toast.success('Grades deleted successfully');
-      fetchExistingGrades();
-    } catch (error) {
-      toast.error('Failed to delete grades');
+      console.error('Error deleting year:', error);
+      toast.error('Failed to delete year data');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -113,123 +122,78 @@ const AcademicGrades = ({ selectedStudent }) => {
     );
   }
 
+  // Calculate which years are available to add
+  const availableYears = ['1', '2', '3', '4'].filter(year => !years.includes(year));
+
   return (
     <div className="space-y-8">
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Academic Grades</h2>
-
-        {/* Existing Grades Display */}
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold mb-4">Existing Grades</h3>
-          <div className="grid gap-4 md:grid-cols-2">
-            {Object.entries(existingGrades).map(([year, semesters]) =>
-              Object.entries(semesters).map(([semester, subjects]) => (
-                <div key={`${year}-${semester}`} className="bg-gray-50 p-4 rounded-lg">
-                  <div className="flex justify-between items-center mb-3">
-                    <h4 className="font-medium">Year {year}, Semester {semester}</h4>
-                    <button
-                      onClick={() => handleDeleteGrades(year, semester)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  <div className="space-y-2">
-                    {Array.isArray(subjects) ? (
-                      subjects.map((subject, idx) => (
-                        <div key={idx} className="flex justify-between text-sm">
-                          <span>{subject.subject}</span>
-                          <span className="font-medium">{subject.marks}</span>
-                        </div>
-                      ))
-                    ) : (
-                      <p>No subjects available</p>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Academic Years</h2>
+        
+        {years.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600">No academic data available for this student.</p>
+            <p className="text-gray-500 mt-2">Add a new academic year to get started.</p>
           </div>
-        </div>
-
-        {/* Add New Grades Form */}
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Year</label>
-              <select
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: e.target.value })}
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>Year {year}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Semester</label>
-              <select
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={formData.semester}
-                onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-              >
-                {semesters.map((sem) => (
-                  <option key={sem} value={sem}>Semester {sem}</option>
-                ))}
-              </select>
-            </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {years.map(year => {
+              const yearData = existingGrades[year] || {};
+              const semesterData = yearData.semester || {};
+              const semesterCount = Object.keys(semesterData).filter(sem => !sem.startsWith('$')).length;
+              
+              return (
+                <div key={year} className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <div className="p-4 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">Year {year}</h3>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => handleDeleteYear(year)}
+                        className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-50"
+                        title="Delete Year"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                      <Link
+                        to={`/admin/academic/${year}`}
+                        state={{ student: selectedStudent, yearData: existingGrades[year] }}
+                        className="text-indigo-600 hover:text-indigo-800 p-1 rounded-full hover:bg-indigo-50"
+                        title="View Details"
+                      >
+                        <ChevronRight className="h-5 w-5" />
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="px-4 pb-4">
+                    <p className="text-sm text-gray-600">
+                      {semesterCount} semester(s)
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
+        )}
 
-          <div className="space-y-4">
-            {formData.subjects.map((subject, index) => (
-              <div key={index} className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <input
-                    type="text"
-                    placeholder="Subject Name"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    value={subject.name}
-                    onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
-                  />
-                </div>
-                <div className="flex-1">
-                  <input
-                    type="number"
-                    placeholder="Marks"
-                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                    value={subject.marks}
-                    onChange={(e) => handleSubjectChange(index, 'marks', e.target.value)}
-                  />
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveSubject(index)}
-                  className="text-red-600 hover:text-red-800"
+        {/* Add New Year Section */}
+        {availableYears.length > 0 && (
+          <div className="mt-8 pt-6 border-t">
+            <h3 className="text-lg font-semibold mb-4">Add New Academic Year</h3>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {availableYears.map(year => (
+                <Link
+                  key={year}
+                  to={`/admin/academic/${year}`}
+                  state={{ student: selectedStudent, yearData: {} }}
+                  className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors"
                 >
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
-            ))}
+                  <Plus className="h-5 w-5 mr-2 text-indigo-600" />
+                  <span className="font-medium text-indigo-600">Year {year}</span>
+                </Link>
+              ))}
+            </div>
           </div>
-
-          <div className="flex justify-between">
-            <button
-              type="button"
-              onClick={handleAddSubject}
-              className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              <Plus className="h-5 w-5 mr-2" />
-              Add Subject
-            </button>
-            <button
-              type="submit"
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-            >
-              Save Grades
-            </button>
-          </div>
-        </form>
+        )}
       </div>
     </div>
   );

@@ -14,7 +14,8 @@ const BestPerformingPage = () => {
   const fetchStudents = async () => {
     try {
       const response = await performanceApi.getBestPerforming();
-      setStudents(response.data);
+      console.log(response.data); // Log the response data
+      setStudents(response.data); // Ensure this is an array
       setLoading(false);
     } catch (error) {
       toast.error('Failed to fetch student performance data');
@@ -38,7 +39,7 @@ const BestPerformingPage = () => {
       </div>
 
       <div className="grid md:grid-cols-2 gap-8">
-        {students.slice(0, 2).map((student, index) => (
+        {Array.isArray(students) && students.slice(0, 2).map((student, index) => (
           <div
             key={student._id}
             className={`bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 ${

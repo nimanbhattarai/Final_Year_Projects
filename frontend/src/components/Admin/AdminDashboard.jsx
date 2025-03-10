@@ -5,6 +5,7 @@ import AcademicGrades from './AcademicGrades';
 import ExtraCurricular from './ExtraCurricular';
 import TeacherRemarks from './TeacherRemarks';
 import StudentDetails from './StudentDetails';
+import YearDetails from './YearDetails';
 
 const AdminDashboard = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -12,7 +13,7 @@ const AdminDashboard = () => {
   const location = useLocation();
 
   const handleBack = () => {
-    if (selectedStudent) {
+    if (selectedStudent && !location.pathname.includes('/academic/')) {
       setSelectedStudent(null);
     } else {
       navigate(-1);
@@ -68,7 +69,7 @@ const AdminDashboard = () => {
             <ArrowLeft className="w-5 h-5 mr-2" />
             Back
           </button>
-          {selectedStudent && (
+          {selectedStudent && !location.pathname.includes('/academic/') && (
             <div className="text-gray-600">
               Selected Student: <span className="font-medium">{selectedStudent.name}</span>
             </div>
@@ -77,6 +78,7 @@ const AdminDashboard = () => {
         <Routes>
           <Route path="students" element={<StudentDetails onSelectStudent={setSelectedStudent} />} />
           <Route path="academic" element={<AcademicGrades selectedStudent={selectedStudent} />} />
+          <Route path="academic/:year" element={<YearDetails />} />
           <Route path="extracurricular" element={<ExtraCurricular selectedStudent={selectedStudent} />} />
           <Route path="remarks" element={<TeacherRemarks selectedStudent={selectedStudent} />} />
         </Routes>

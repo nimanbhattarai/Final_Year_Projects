@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+// const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://final-year-projects-backend.onrender.com/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -17,6 +18,15 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Add response interceptor for error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('API Error:', error.response?.data || error.message);
+    return Promise.reject(error);
+  }
+);
 
 export const adminApi = {
   login: (credentials) => api.post('/admin/login', credentials),
