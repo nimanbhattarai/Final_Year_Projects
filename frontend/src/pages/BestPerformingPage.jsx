@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { performanceApi } from '../services/api';
-import { Trophy, Star, TrendingUp, Users, Award, BookOpen, MessageSquare, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Trophy, Star, TrendingUp, Users, Award, BookOpen, MessageSquare, Filter, ChevronDown, ChevronUp, Crown, Medal, TrendingDown, BarChart4, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const BestPerformingPage = () => {
@@ -190,63 +190,90 @@ const BestPerformingPage = () => {
   const availableYears = getAvailableYears();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">Student Performance Rankings</h1>
-        <p className="text-lg text-gray-600">Compare and analyze student achievements across different areas</p>
+    <div className="max-w-7xl mx-auto px-4 py-8 bg-gradient-to-b from-indigo-50 to-white min-h-screen">
+      <div className="mb-12 text-center">
+        <h1 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 mb-4 leading-tight">
+          Student Performance Rankings
+        </h1>
+        <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+          Compare and analyze student achievements across different areas of academic and extracurricular excellence
+        </p>
       </div>
 
       {/* Top Performers Section */}
-      <div className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-          <Trophy className="h-6 w-6 text-yellow-500 mr-2" />
-          Top Performers
+      <div className="mb-16">
+        <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center">
+          <Crown className="h-7 w-7 text-yellow-500 mr-3" />
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-500 to-amber-600">
+            Top Performers
+          </span>
         </h2>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredStudents.slice(0, 3).map((student, index) => (
             <div
               key={student._id}
-              className={`bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-transform duration-300 ${
-                index === 0 ? 'border-4 border-yellow-400' : index === 1 ? 'border-4 border-gray-400' : index === 2 ? 'border-4 border-amber-700' : ''
+              className={`bg-white rounded-xl shadow-xl overflow-hidden transform hover:scale-105 transition-all duration-300 ${
+                index === 0 
+                  ? 'ring-4 ring-yellow-400 shadow-yellow-200'
+                  : index === 1 
+                    ? 'ring-4 ring-gray-400 shadow-gray-200'
+                    : index === 2 
+                      ? 'ring-4 ring-amber-700 shadow-amber-200'
+                      : ''
               }`}
             >
-              <div className={`px-6 py-4 ${
+              <div className={`px-6 py-6 ${
                 index === 0 
-                  ? 'bg-gradient-to-r from-yellow-400 to-yellow-600' 
+                  ? 'bg-gradient-to-r from-yellow-400 to-amber-500' 
                   : index === 1 
-                    ? 'bg-gradient-to-r from-gray-400 to-gray-600' 
-                    : 'bg-gradient-to-r from-amber-700 to-amber-900'
+                    ? 'bg-gradient-to-r from-gray-400 to-gray-500' 
+                    : 'bg-gradient-to-r from-amber-700 to-amber-800'
               }`}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <Users className="h-12 w-12 text-white" />
+                    <div className="bg-white p-2 rounded-full">
+                      {index === 0 ? (
+                        <Crown className="h-10 w-10 text-yellow-500" />
+                      ) : index === 1 ? (
+                        <Medal className="h-10 w-10 text-gray-500" />
+                      ) : (
+                        <Award className="h-10 w-10 text-amber-700" />
+                      )}
+                    </div>
                     <div>
                       <h2 className="text-2xl font-bold text-white">{student.name}</h2>
-                      <p className="text-white opacity-90">
-                        {index === 0 ? '🥇 Gold' : index === 1 ? '🥈 Silver' : '🥉 Bronze'}
+                      <p className="text-white opacity-90 flex items-center">
+                        {index === 0 
+                          ? '🥇 Gold Achiever' 
+                          : index === 1 
+                            ? '🥈 Silver Performer' 
+                            : '🥉 Bronze Talent'}
                       </p>
                     </div>
                   </div>
-                  <div className="bg-white bg-opacity-20 rounded-full p-2">
-                    <span className="text-white font-bold text-xl">{student.totalScore}</span>
+                  <div className="bg-white bg-opacity-20 rounded-full h-16 w-16 flex items-center justify-center border-2 border-white">
+                    <div className="text-center">
+                      <span className="text-white font-bold text-xl">{student.totalScore}</span>
+                      <span className="block text-white text-xs">points</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <div className="p-6">
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-indigo-50 rounded-lg">
+                <div className="grid grid-cols-3 gap-4 mb-8">
+                  <div className="text-center p-4 bg-gradient-to-b from-indigo-50 to-white rounded-lg shadow-sm">
                     <BookOpen className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
                     <h3 className="text-sm font-semibold text-gray-600">Academic</h3>
                     <p className="text-2xl font-bold text-indigo-600">{student.academicScore}%</p>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <div className="text-center p-4 bg-gradient-to-b from-purple-50 to-white rounded-lg shadow-sm">
                     <Award className="h-8 w-8 text-purple-600 mx-auto mb-2" />
                     <h3 className="text-sm font-semibold text-gray-600">Extra</h3>
                     <p className="text-2xl font-bold text-purple-600">{student.extraCurricularScore}%</p>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-center p-4 bg-gradient-to-b from-green-50 to-white rounded-lg shadow-sm">
                     <MessageSquare className="h-8 w-8 text-green-600 mx-auto mb-2" />
                     <h3 className="text-sm font-semibold text-gray-600">Remarks</h3>
                     <p className="text-2xl font-bold text-green-600">{student.remarksScore}%</p>
@@ -255,66 +282,69 @@ const BestPerformingPage = () => {
 
                 {/* Year Performance (if year filter is applied) */}
                 {filterYear !== 'all' && student.academicByYear && student.academicByYear[filterYear] && (
-                  <div className="mb-4 p-3 bg-blue-50 rounded-lg">
-                    <h3 className="text-sm font-semibold text-gray-700 mb-1">Year {filterYear} Performance</h3>
+                  <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-1 flex items-center">
+                      <Sparkles className="h-4 w-4 mr-1 text-blue-500" />
+                      Year {filterYear} Performance
+                    </h3>
                     <p className="text-xl font-bold text-blue-600">
                       {student.academicByYear[filterYear].average}%
                     </p>
                     <p className="text-xs text-gray-500">
-                      {student.academicByYear[filterYear].subjects} subjects
+                      {student.academicByYear[filterYear].subjects} subjects completed
                     </p>
                   </div>
                 )}
 
                 {/* Progress bars */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   <div className="relative pt-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold inline-block text-indigo-600">
-                        Academic
+                      <span className="text-xs font-semibold inline-block text-indigo-600 flex items-center">
+                        <BookOpen className="h-3 w-3 mr-1" /> Academic
                       </span>
                       <span className="text-xs font-semibold inline-block text-indigo-600">
                         {student.academicScore}%
                       </span>
                     </div>
-                    <div className="overflow-hidden h-2 text-xs flex rounded bg-indigo-200">
+                    <div className="overflow-hidden h-2 text-xs flex rounded-full bg-indigo-200">
                       <div
                         style={{ width: `${student.academicScore}%` }}
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-indigo-600"
+                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-indigo-500 to-indigo-600 transition-all duration-500 ease-in-out"
                       ></div>
                     </div>
                   </div>
 
                   <div className="relative pt-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold inline-block text-purple-600">
-                        Extra-Curricular
+                      <span className="text-xs font-semibold inline-block text-purple-600 flex items-center">
+                        <Award className="h-3 w-3 mr-1" /> Extra-Curricular
                       </span>
                       <span className="text-xs font-semibold inline-block text-purple-600">
                         {student.extraCurricularScore}%
                       </span>
                     </div>
-                    <div className="overflow-hidden h-2 text-xs flex rounded bg-purple-200">
+                    <div className="overflow-hidden h-2 text-xs flex rounded-full bg-purple-200">
                       <div
                         style={{ width: `${student.extraCurricularScore}%` }}
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-purple-600"
+                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500 ease-in-out"
                       ></div>
                     </div>
                   </div>
 
                   <div className="relative pt-1">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-semibold inline-block text-green-600">
-                        Overall Score
+                      <span className="text-xs font-semibold inline-block text-green-600 flex items-center">
+                        <TrendingUp className="h-3 w-3 mr-1" /> Overall Score
                       </span>
                       <span className="text-xs font-semibold inline-block text-green-600">
                         {student.totalScore}%
                       </span>
                     </div>
-                    <div className="overflow-hidden h-2 text-xs flex rounded bg-green-200">
+                    <div className="overflow-hidden h-2 text-xs flex rounded-full bg-green-200">
                       <div
                         style={{ width: `${student.totalScore}%` }}
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-600"
+                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-gradient-to-r from-green-500 to-green-600 transition-all duration-500 ease-in-out"
                       ></div>
                     </div>
                   </div>
@@ -326,15 +356,15 @@ const BestPerformingPage = () => {
       </div>
 
       {/* Filters and Tabs */}
-      <div className="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+      <div className="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
         {/* Year Filter */}
-        <div className="flex items-center space-x-2">
-          <Filter className="h-5 w-5 text-gray-600" />
-          <span className="text-gray-700 font-medium">Filter by Year:</span>
+        <div className="flex items-center px-4 py-2 bg-white rounded-lg shadow-md">
+          <Filter className="h-5 w-5 text-indigo-600 mr-2" />
+          <span className="text-gray-700 font-medium mr-2">Filter by Year:</span>
           <select
             value={filterYear}
             onChange={(e) => setFilterYear(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
           >
             <option value="all">All Years</option>
             {availableYears.map(year => (
@@ -344,50 +374,59 @@ const BestPerformingPage = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 w-full md:w-auto">
+        <div className="flex bg-white rounded-lg shadow-md overflow-hidden">
           <button
-            className={`px-4 py-2 font-medium ${
+            className={`px-4 py-3 font-medium transition-all duration-300 ${
               activeTab === 'overall' 
-                ? 'border-b-2 border-indigo-600 text-indigo-600' 
-                : 'text-gray-600 hover:text-indigo-600'
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600'
             }`}
             onClick={() => setActiveTab('overall')}
           >
-            Overall Rankings
+            <div className="flex items-center">
+              <BarChart4 className="h-4 w-4 mr-2" />
+              Overall Rankings
+            </div>
           </button>
           <button
-            className={`px-4 py-2 font-medium ${
+            className={`px-4 py-3 font-medium transition-all duration-300 ${
               activeTab === 'academic' 
-                ? 'border-b-2 border-indigo-600 text-indigo-600' 
-                : 'text-gray-600 hover:text-indigo-600'
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600'
             }`}
             onClick={() => setActiveTab('academic')}
           >
-            Academic
+            <div className="flex items-center">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Academic
+            </div>
           </button>
           <button
-            className={`px-4 py-2 font-medium ${
+            className={`px-4 py-3 font-medium transition-all duration-300 ${
               activeTab === 'extra' 
-                ? 'border-b-2 border-indigo-600 text-indigo-600' 
-                : 'text-gray-600 hover:text-indigo-600'
+                ? 'bg-indigo-600 text-white' 
+                : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-600'
             }`}
             onClick={() => setActiveTab('extra')}
           >
-            Extra-Curricular
+            <div className="flex items-center">
+              <Award className="h-4 w-4 mr-2" />
+              Extra-Curricular
+            </div>
           </button>
         </div>
       </div>
 
       {/* Rankings Table */}
-      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="bg-white rounded-lg shadow-xl overflow-hidden transition-all duration-500">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-gradient-to-r from-indigo-600 to-indigo-700">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Rank
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">
                   Student
                 </th>
                 
@@ -395,40 +434,44 @@ const BestPerformingPage = () => {
                   <>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-indigo-700 transition-colors"
                       onClick={() => handleSort('academicScore')}
                     >
                       <div className="flex items-center">
+                        <BookOpen className="h-4 w-4 mr-1" />
                         Academic
                         {renderSortIndicator('academicScore')}
                       </div>
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-indigo-700 transition-colors"
                       onClick={() => handleSort('extraCurricularScore')}
                     >
                       <div className="flex items-center">
+                        <Award className="h-4 w-4 mr-1" />
                         Extra-Curricular
                         {renderSortIndicator('extraCurricularScore')}
                       </div>
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-indigo-700 transition-colors"
                       onClick={() => handleSort('remarksScore')}
                     >
                       <div className="flex items-center">
+                        <MessageSquare className="h-4 w-4 mr-1" />
                         Remarks
                         {renderSortIndicator('remarksScore')}
                       </div>
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-indigo-700 transition-colors"
                       onClick={() => handleSort('totalScore')}
                     >
                       <div className="flex items-center">
+                        <TrendingUp className="h-4 w-4 mr-1" />
                         Total Score
                         {renderSortIndicator('totalScore')}
                       </div>
@@ -439,13 +482,13 @@ const BestPerformingPage = () => {
                 {activeTab === 'academic' && (
                   <>
                     {filterYear !== 'all' ? (
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">
                         Year {filterYear} Average
                       </th>
                     ) : (
                       <>
                         {getAvailableYears().map(year => (
-                          <th key={year} scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          <th key={year} scope="col" className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">
                             Year {year}
                           </th>
                         ))}
@@ -453,7 +496,7 @@ const BestPerformingPage = () => {
                     )}
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-indigo-700 transition-colors"
                       onClick={() => handleSort('academicScore')}
                     >
                       <div className="flex items-center">
@@ -466,12 +509,12 @@ const BestPerformingPage = () => {
                 
                 {activeTab === 'extra' && (
                   <>
-                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Activities
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-indigo-700 transition-colors"
                       onClick={() => handleSort('extraCurricularScore')}
                     >
                       <div className="flex items-center">
@@ -481,7 +524,7 @@ const BestPerformingPage = () => {
                     </th>
                     <th 
                       scope="col" 
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-4 text-left text-xs font-medium text-white uppercase tracking-wider cursor-pointer hover:bg-indigo-700 transition-colors"
                       onClick={() => handleSort('remarksScore')}
                     >
                       <div className="flex items-center">
@@ -495,20 +538,44 @@ const BestPerformingPage = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredStudents.map((student, index) => (
-                <tr key={student._id} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                <tr 
+                  key={student._id} 
+                  className={`hover:bg-indigo-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}
+                >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <span className="text-sm font-medium text-gray-900">#{index + 1}</span>
-                      {index < 3 && (
-                        <span className="ml-2">
-                          {index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'}
-                        </span>
+                      {index < 3 ? (
+                        <div className={`h-8 w-8 rounded-full flex items-center justify-center mr-2 ${
+                          index === 0
+                            ? 'bg-yellow-100 text-yellow-600' 
+                            : index === 1 
+                              ? 'bg-gray-100 text-gray-600'
+                              : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {index === 0 ? (
+                            <Crown className="h-4 w-4" />
+                          ) : index === 1 ? (
+                            <Medal className="h-4 w-4" />
+                          ) : (
+                            <Award className="h-4 w-4" />
+                          )}
+                        </div>
+                      ) : (
+                        <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center mr-2">
+                          <span className="text-sm font-medium text-gray-600">{index + 1}</span>
+                        </div>
                       )}
+                      <span className="text-sm font-medium text-gray-900">
+                        {index === 0 ? 'Gold' : index === 1 ? 'Silver' : index === 2 ? 'Bronze' : `Rank #${index + 1}`}
+                      </span>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="ml-4">
+                      <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                        {student.name.charAt(0)}
+                      </div>
+                      <div className="ml-3">
                         <div className="text-sm font-medium text-gray-900">{student.name}</div>
                         <div className="text-sm text-gray-500">{student.email}</div>
                       </div>
@@ -518,16 +585,42 @@ const BestPerformingPage = () => {
                   {activeTab === 'overall' && (
                     <>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{student.academicScore}%</div>
+                        <div className="flex items-center">
+                          <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div 
+                              className="bg-indigo-600 h-2.5 rounded-full"
+                              style={{ width: `${student.academicScore}%` }}
+                            ></div>
+                          </div>
+                          <div className="text-sm text-gray-900 font-medium">{student.academicScore}%</div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{student.extraCurricularScore}%</div>
+                        <div className="flex items-center">
+                          <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div 
+                              className="bg-purple-600 h-2.5 rounded-full"
+                              style={{ width: `${student.extraCurricularScore}%` }}
+                            ></div>
+                          </div>
+                          <div className="text-sm text-gray-900 font-medium">{student.extraCurricularScore}%</div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{student.remarksScore}%</div>
+                        <div className="flex items-center">
+                          <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div 
+                              className="bg-green-600 h-2.5 rounded-full"
+                              style={{ width: `${student.remarksScore}%` }}
+                            ></div>
+                          </div>
+                          <div className="text-sm text-gray-900 font-medium">{student.remarksScore}%</div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{student.totalScore}%</div>
+                        <div className="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full inline-block">
+                          {student.totalScore}%
+                        </div>
                       </td>
                     </>
                   )}
@@ -538,17 +631,37 @@ const BestPerformingPage = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-900">
                             {student.academicByYear && student.academicByYear[filterYear] 
-                              ? `${student.academicByYear[filterYear].average}%` 
+                              ? (
+                                <div className="flex items-center">
+                                  <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                                    <div 
+                                      className="bg-blue-600 h-2.5 rounded-full"
+                                      style={{ width: `${student.academicByYear[filterYear].average}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="font-medium">{student.academicByYear[filterYear].average}%</span>
+                                </div>
+                              )
                               : 'N/A'}
                           </div>
                         </td>
                       ) : (
                         <>
-                          {availableYears.map(year => (
+                          {getAvailableYears().map(year => (
                             <td key={year} className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm text-gray-900">
                                 {student.academicByYear && student.academicByYear[year] 
-                                  ? `${student.academicByYear[year].average}%` 
+                                  ? (
+                                    <div className="flex items-center">
+                                      <div className="w-16 bg-gray-200 rounded-full h-2.5 mr-2">
+                                        <div 
+                                          className="bg-blue-600 h-2.5 rounded-full"
+                                          style={{ width: `${student.academicByYear[year].average}%` }}
+                                        ></div>
+                                      </div>
+                                      <span className="font-medium">{student.academicByYear[year].average}%</span>
+                                    </div>
+                                  )
                                   : 'N/A'}
                               </div>
                             </td>
@@ -556,7 +669,9 @@ const BestPerformingPage = () => {
                         </>
                       )}
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{student.academicScore}%</div>
+                        <div className="text-sm font-bold text-indigo-600 bg-indigo-50 px-3 py-1 rounded-full inline-block">
+                          {student.academicScore}%
+                        </div>
                       </td>
                     </>
                   )}
@@ -567,27 +682,49 @@ const BestPerformingPage = () => {
                         <div className="text-sm text-gray-900">
                           {student.extracurricular && student.extracurricular.length > 0 
                             ? (
-                              <ul className="list-disc list-inside">
+                              <ul className="space-y-1">
                                 {student.extracurricular.slice(0, 3).map((activity, idx) => (
-                                  <li key={idx} className="text-sm">
-                                    {activity.activity} ({activity.grade}/10)
+                                  <li key={idx} className="flex items-center text-sm">
+                                    <span className="h-2 w-2 rounded-full bg-purple-500 mr-2"></span>
+                                    <span className="font-medium">{activity.activity}</span>
+                                    <span className="ml-2 text-xs bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full">
+                                      {activity.grade}/10
+                                    </span>
                                   </li>
                                 ))}
                                 {student.extracurricular.length > 3 && (
-                                  <li className="text-xs text-gray-500">
-                                    +{student.extracurricular.length - 3} more
+                                  <li className="text-xs text-gray-500 italic pl-4">
+                                    +{student.extracurricular.length - 3} more activities
                                   </li>
                                 )}
                               </ul>
                             ) 
-                            : 'No activities'}
+                            : (
+                              <span className="text-gray-500 italic">No activities recorded</span>
+                            )}
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{student.extraCurricularScore}%</div>
+                        <div className="flex items-center">
+                          <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div 
+                              className="bg-purple-600 h-2.5 rounded-full"
+                              style={{ width: `${student.extraCurricularScore}%` }}
+                            ></div>
+                          </div>
+                          <div className="text-sm text-gray-900 font-medium">{student.extraCurricularScore}%</div>
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{student.remarksScore}%</div>
+                        <div className="flex items-center">
+                          <div className="w-24 bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div 
+                              className="bg-green-600 h-2.5 rounded-full"
+                              style={{ width: `${student.remarksScore}%` }}
+                            ></div>
+                          </div>
+                          <div className="text-sm text-gray-900 font-medium">{student.remarksScore}%</div>
+                        </div>
                       </td>
                     </>
                   )}
@@ -596,6 +733,11 @@ const BestPerformingPage = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-12 text-center text-gray-500 text-sm">
+        <p>Student performance rankings are calculated based on academic scores (70%), extracurricular activities (20%), and teacher remarks (10%).</p>
       </div>
     </div>
   );
