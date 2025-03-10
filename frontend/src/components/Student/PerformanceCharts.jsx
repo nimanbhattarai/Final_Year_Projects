@@ -490,7 +490,7 @@ const PerformanceCharts = ({ studentId }) => {
                       tooltip: {
                         callbacks: {
                           label: function(context) {
-                            return ` ${context.label}: ${context.raw}/100`;
+                            return ` ${context.label}: ${context.raw}/10`;
                           }
                         }
                       }
@@ -514,7 +514,7 @@ const PerformanceCharts = ({ studentId }) => {
                       <div className="flex justify-between items-center">
                         <h4 className="font-medium">{activity.activity}</h4>
                         <div className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-sm font-medium">
-                          Grade: {activity.grade}/100
+                          Grade: {activity.grade}/10
                         </div>
                       </div>
                     </div>

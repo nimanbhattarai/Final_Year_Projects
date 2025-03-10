@@ -177,7 +177,7 @@ const ExtraCurricular = ({ selectedStudent }) => {
                 type="number"
                 required
                 min="0"
-                max="100"
+                max="10"
                 className="w-full p-2 border rounded-md"
                 value={formData.grade}
                 onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
