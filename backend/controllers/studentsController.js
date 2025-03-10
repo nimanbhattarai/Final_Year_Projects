@@ -157,22 +157,19 @@ const getAcademicRecords = async (req, res) => {
   const { studentId } = req.params;
 
   try {
-    // 🔥 Fetch the student data and convert it to a plain JSON object
     const student = await Student.findById(studentId).lean();
-
     if (!student) {
       return res.status(404).json({ message: "Student not found" });
     }
 
     if (!student.performance || !student.performance.academic) {
-      return res.status(404).json({ message: "No academic records found" });
+      return res.status(200).json({ academic: {} }); // Return empty object if no data exists
     }
 
-    // 🔥 Ensure `academic` is an object and extract only valid academic years
     const academicData = student.performance.academic;
     
     let academicYears = Object.keys(academicData)
-      .filter(key => !key.startsWith("$")) // Ignore Mongoose internals
+      .filter(key => !key.startsWith("$"))
       .map(year => ({
         year,
         semesters: Object.keys(academicData[year].semester || {}).map(semKey => ({
