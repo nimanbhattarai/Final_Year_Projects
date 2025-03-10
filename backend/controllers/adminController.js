@@ -114,10 +114,109 @@ const deleteStudent = async (req, res) => {
   }
 };
 
+// Get all students with performance data for rankings
+const getStudentsWithPerformance = async (req, res) => {
+  try {
+    const students = await Student.find();
+    
+    if (!students.length) {
+      return res.status(404).json({ message: "No students found" });
+    }
+
+    // Process each student to calculate performance metrics
+    const studentsWithPerformance = students.map(student => {
+      // Calculate academic scores by year and overall
+      const academicByYear = {};
+      let totalAcademicScore = 0;
+      let totalSubjects = 0;
+      
+      // Process academic data if it exists
+      if (student.performance && student.performance.academic) {
+        for (const [year, yearData] of student.performance.academic.entries()) {
+          if (yearData.semester) {
+            let yearTotal = 0;
+            let yearSubjects = 0;
+            
+            for (const [semester, subjects] of yearData.semester.entries()) {
+              if (Array.isArray(subjects)) {
+                const validSubjects = subjects.filter(s => s && typeof s.marks === 'number');
+                yearTotal += validSubjects.reduce((sum, subject) => sum + subject.marks, 0);
+                yearSubjects += validSubjects.length;
+              }
+            }
+            
+            academicByYear[year] = {
+              total: yearTotal,
+              subjects: yearSubjects,
+              average: yearSubjects > 0 ? Math.round((yearTotal / yearSubjects) * 10) / 10 : 0
+            };
+            
+            totalAcademicScore += yearTotal;
+            totalSubjects += yearSubjects;
+          }
+        }
+      }
+      
+      // Calculate extracurricular score
+      const extracurricular = student.performance?.extracurricular || [];
+      const extracurricularScore = extracurricular.reduce(
+        (sum, activity) => sum + (activity.grade || 0), 
+        0
+      );
+      
+      // Calculate teacher remarks score
+      const teacherRemarks = student.performance?.teacherRemarks || [];
+      const teacherRemarksScore = teacherRemarks.reduce(
+        (sum, remark) => sum + (remark.grade || 0), 
+        0
+      );
+      
+      // Calculate overall academic average
+      const academicAverage = totalSubjects > 0 
+        ? Math.round((totalAcademicScore / totalSubjects) * 10) / 10 
+        : 0;
+      
+      // Calculate normalized scores (out of 100)
+      const academicScore = Math.min(100, Math.round((academicAverage / 100) * 100));
+      const extraCurricularScore = Math.min(100, Math.round((extracurricularScore / (extracurricular.length * 10)) * 100) || 0);
+      const remarksScore = Math.min(100, Math.round((teacherRemarksScore / (teacherRemarks.length * 10)) * 100) || 0);
+      
+      // Calculate weighted total score
+      const totalScore = Math.round(
+        (academicScore * 0.7) + 
+        (extraCurricularScore * 0.2) + 
+        (remarksScore * 0.1)
+      );
+      
+      return {
+        _id: student._id,
+        name: student.name,
+        email: student.email,
+        academicByYear,
+        academicScore,
+        extraCurricularScore,
+        remarksScore,
+        totalScore,
+        extracurricular,
+        teacherRemarks
+      };
+    });
+    
+    // Sort students by total score (descending)
+    studentsWithPerformance.sort((a, b) => b.totalScore - a.totalScore);
+    
+    res.status(200).json(studentsWithPerformance);
+  } catch (error) {
+    console.error('Error fetching students with performance:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   registerAdmin,
   loginAdmin,
   getStudents,
   updateStudentData,
-  deleteStudent
+  deleteStudent,
+  getStudentsWithPerformance
 };

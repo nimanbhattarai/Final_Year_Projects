@@ -4,7 +4,8 @@ const {
   loginAdmin,
   getStudents,
   updateStudentData,
-  deleteStudent
+  deleteStudent,
+  getStudentsWithPerformance
 } = require("../controllers/adminController");
 const router = express.Router();
 
@@ -21,5 +22,8 @@ router.get("/students", getStudents);
 router.put("/student/update", updateStudentData);
 
 router.delete("/student/:studentId", deleteStudent);
+
+// Add the new route for getting students with performance data
+router.get('/students-with-performance', getStudentsWithPerformance);
 
 module.exports = router;
