@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { studentApi } from "../../services/api";
-import { User, Book, Award, MessageSquare, GraduationCap } from "lucide-react";
+import { User, Book, Award, MessageSquare, GraduationCap, Facebook, Instagram, Linkedin, Github } from "lucide-react";
 import toast from "react-hot-toast";
 
 const StudentProfile = () => {
@@ -74,6 +74,58 @@ const StudentProfile = () => {
             </div>
           </div>
         </div>
+        
+        {/* Social Media Links */}
+        {profile.socialMedia && (
+          <div className="bg-white px-6 py-4 border-t border-gray-200">
+            <div className="flex flex-wrap items-center gap-4">
+              {profile.socialMedia.facebook && (
+                <a 
+                  href={profile.socialMedia.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                  <Facebook className="h-5 w-5" />
+                  <span className="text-sm">Facebook</span>
+                </a>
+              )}
+              {profile.socialMedia.instagram && (
+                <a 
+                  href={profile.socialMedia.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-pink-600 transition-colors"
+                >
+                  <Instagram className="h-5 w-5" />
+                  <span className="text-sm">Instagram</span>
+                </a>
+              )}
+              {profile.socialMedia.linkedin && (
+                <a 
+                  href={profile.socialMedia.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-blue-700 transition-colors"
+                >
+                  <Linkedin className="h-5 w-5" />
+                  <span className="text-sm">LinkedIn</span>
+                </a>
+              )}
+              {profile.socialMedia.github && (
+                <a 
+                  href={profile.socialMedia.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 transition-colors"
+                >
+                  <Github className="h-5 w-5" />
+                  <span className="text-sm">GitHub</span>
+                </a>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-6">

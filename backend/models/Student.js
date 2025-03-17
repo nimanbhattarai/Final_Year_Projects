@@ -5,6 +5,12 @@ const studentSchema = mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    socialMedia: {
+      facebook: { type: String, default: "" },
+      instagram: { type: String, default: "" },
+      linkedin: { type: String, default: "" },
+      github: { type: String, default: "" },
+    },
     performance: {
       academic: {
         type: Map, // Use Map for structured academic data

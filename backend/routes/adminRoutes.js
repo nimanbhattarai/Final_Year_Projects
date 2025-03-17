@@ -5,7 +5,8 @@ const {
   getStudents,
   updateStudentData,
   deleteStudent,
-  getStudentsWithPerformance
+  getStudentsWithPerformance,
+  getStudent
 } = require("../controllers/adminController");
 const router = express.Router();
 
@@ -20,6 +21,9 @@ router.get("/students", getStudents);
 
 // Update Student Data
 router.put("/student/update", updateStudentData);
+
+// Get a specific student
+router.get("/student/:studentId", getStudent);
 
 router.delete("/student/:studentId", deleteStudent);
 

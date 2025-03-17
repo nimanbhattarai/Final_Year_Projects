@@ -41,6 +41,10 @@ export const adminApi = {
   deleteExtracurricular: (data) => api.delete('/performance/extracurricular', { data }),
   updateTeacherRemarks: (data) => api.put('/performance/teacher-remarks', data),
   deleteTeacherRemarks: (data) => api.delete('/performance/teacher-remarks', { data }),
+  getStudent: (studentId) => adminApi.updateStudentData({
+    studentId, 
+    data: {}  // Empty data to just get student info back
+  }),
 };
 
 export const studentApi = {

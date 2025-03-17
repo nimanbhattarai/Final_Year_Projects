@@ -73,6 +73,7 @@ const getProfile = async (req, res) => {
     res.status(200).json({
       name: student.name,
       email: student.email,
+      socialMedia: student.socialMedia || {},
       performance: {
         academic: academicYears, // ✅ Now structured properly
         extracurricular: student.performance.extracurricular || [],
@@ -119,7 +120,7 @@ const academicAnalysis = async (req, res) => {
 };
 // Register a New Student
 const registerStudent = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, socialMedia } = req.body;
 
   try {
     // Check if the student already exists
@@ -136,6 +137,7 @@ const registerStudent = async (req, res) => {
       name,
       email,
       password: hashedPassword,
+      socialMedia: socialMedia || {},
       performance: {
         academic: {},
         extracurricular: [],
