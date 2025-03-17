@@ -4,6 +4,90 @@ import { adminApi } from '../../services/api';
 import { Trash2, Plus, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
+const subjectsByYearAndSemester = {
+  '1': {
+    '1': [
+      'Mathematics For Computing - I',
+      'Physics For Computing',
+      'Computer Aided Drafting',
+      'Digital Electronics',
+      'Structured Programming',
+      'Computer System Workshop Technology'
+    ],
+    '2': [
+      'Mathematics For Computing - II',
+      'Organic & ElectroChemistry',
+      'Electrical Technology',
+      'Object Oriented Programming',
+      'Programing Paradigms',
+      'Web Programming'
+    ]
+  },
+  '2': {
+    '3': [
+      'Discrete Structures & Graph Theory',
+      'Data Structures',
+      'Database Management Systems',
+      'ITC-I: Software Engineering',
+      'Computer Communication & Network',
+      'Information Technology Laboratory-I',
+      'Vocational Course-I'
+    ],
+    '4': [
+      'ITC-II: Infrastructure Management',
+      'Formal Languages & Computing Theory',
+      'Microprocessor & Microcontroller',
+      'Applied Algorithms',
+      'Operating Systems',
+      'Information Technology Laboratory-II',
+      'Vocational Course-II'
+    ]
+  },
+  '3': {
+    '5': [
+      'Human Computer Interaction ',
+      'Artificial Intelligence and Machine Learning ',
+      'Computer Architecture and Organization',
+      'ITC-III: Advanced Database System',
+      'Mobile Application Development',
+      'Information Technology Laboratory-III',
+      'Vocational Course-III' 
+    ],
+    '6': [
+      'ITC-IV: Cloud Computing',
+      'Software Testing & Quality Assurance',
+      'Data Warehousing & Data Mining',
+      'Quantitative Techniques, Communication And Values',
+      'Agile Methodologies',
+      'Information Technology Laboratory-IV',
+      'Vocational Course-IV'
+    ]
+  },
+  '4': {
+    '7': [
+      'Project Planning & Management',
+      'ITC-V: Web Services',
+      'Business Intelligence',
+      'Elective - I: Information Retrieval',
+      'Elective - I: Software Architecture',
+      'Elective - I: User Experience',
+      'Elective - I: Storage Area Network',
+      'Information Technology Laboratory-V',
+      'Internship'
+    ],
+    '8': [
+      'Information Security',
+      'Elective - II: Semantic Web Mining', 
+      'Elective - II: Social Analytics in Digital Marketing ',
+      'Elective - II: Management Information System',
+      'Elective - II:  Cyber security',
+      'Internet of Things',
+      'Data Engineering',
+      'Information Technology Laboratory-VI',
+    ]
+  }
+};
+
 const YearDetails = () => {
   const { year } = useParams();
   const location = useLocation();
@@ -17,6 +101,7 @@ const YearDetails = () => {
   });
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [availableSubjects, setAvailableSubjects] = useState([]);
 
   useEffect(() => {
     if (!student || !student._id) {
@@ -25,6 +110,13 @@ const YearDetails = () => {
     }
     fetchStudentAcademicData();
   }, [student, year]);
+
+  useEffect(() => {
+    if (year && formData.semester) {
+      const subjects = subjectsByYearAndSemester[year]?.[formData.semester] || [];
+      setAvailableSubjects(subjects);
+    }
+  }, [year, formData.semester]);
 
   const fetchStudentAcademicData = async () => {
     if (!student || !student._id) return;
@@ -306,14 +398,25 @@ const YearDetails = () => {
                   {formData.subjects.map((subject, index) => (
                     <div key={index} className="flex items-center space-x-3 group">
                       <div className="flex-1">
-                        <input
-                          type="text"
-                          placeholder="Subject Name"
+                        <select
                           value={subject.name}
                           onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
                           className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
                           required
-                        />
+                        >
+                          <option value="">Select Subject</option>
+                          {availableSubjects.map((subj) => (
+                            <option 
+                              key={subj} 
+                              value={subj}
+                              disabled={formData.subjects.some(
+                                (s, i) => i !== index && s.name === subj
+                              )}
+                            >
+                              {subj}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                       <div className="w-28">
                         <input

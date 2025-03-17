@@ -52,18 +52,6 @@ const AdminDashboard = () => {
               {isActiveLink('students') && <ChevronRight className="w-4 h-4 ml-auto" />}
             </Link>
             
-            <Link
-              to="info"
-              className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                isActiveLink('info') 
-                  ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 pl-3' 
-                  : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'
-              }`}
-            >
-              <Info className={`w-5 h-5 mr-3 ${isActiveLink('info') ? 'text-indigo-600' : 'text-gray-500'}`} />
-              Student Info
-              {isActiveLink('info') && <ChevronRight className="w-4 h-4 ml-auto" />}
-            </Link>
             
             <Link
               to="academic"
@@ -102,6 +90,18 @@ const AdminDashboard = () => {
               <GraduationCap className={`w-5 h-5 mr-3 ${isActiveLink('remarks') ? 'text-indigo-600' : 'text-gray-500'}`} />
               Teacher Remarks
               {isActiveLink('remarks') && <ChevronRight className="w-4 h-4 ml-auto" />}
+            </Link>
+            <Link
+              to="info"
+              className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                isActiveLink('info') 
+                  ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 pl-3' 
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'
+              }`}
+            >
+              <Info className={`w-5 h-5 mr-3 ${isActiveLink('info') ? 'text-indigo-600' : 'text-gray-500'}`} />
+              Student Info
+              {isActiveLink('info') && <ChevronRight className="w-4 h-4 ml-auto" />}
             </Link>
           </div>
         </nav>

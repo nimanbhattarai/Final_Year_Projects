@@ -121,24 +121,24 @@ const StudentDetails = ({ onSelectStudent }) => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-900">Student Details</h2>
           <div className="flex items-center space-x-4">
-            <div className="relative">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
                 type="text"
                 placeholder="Search students..."
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <button
               onClick={() => setShowAddForm(true)}
-              className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              className="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 whitespace-nowrap"
             >
               <UserPlus className="h-5 w-5 mr-2" />
               Add Student
@@ -147,35 +147,30 @@ const StudentDetails = ({ onSelectStudent }) => {
         </div>
 
         {selectedStudentId && (
-          <div className="mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-lg animate-fadeIn">
+          <div className="mb-4 bg-indigo-50 border border-indigo-100 rounded-md p-2">
             <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-indigo-100 p-2 rounded-full">
-                  <User className="h-5 w-5 text-indigo-600" />
+              <div className="flex items-center space-x-2">
+                <div className="bg-indigo-100 p-1 rounded-full">
+                  <User className="h-4 w-4 text-indigo-600" />
                 </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-800">
-                    Currently selected: 
-                    <span className="ml-1 text-indigo-700 font-semibold">
-                      {students.find(s => s._id === selectedStudentId)?.name}
-                    </span>
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {students.find(s => s._id === selectedStudentId)?.email}
-                  </p>
+                <div>
+                  <span className="text-sm text-gray-600">Selected:</span>{' '}
+                  <span className="text-sm font-medium text-indigo-700">
+                    {students.find(s => s._id === selectedStudentId)?.name}
+                  </span>
                 </div>
               </div>
               <button 
                 onClick={() => setSelectedStudentId(null)}
-                className="text-sm text-gray-500 hover:text-gray-700"
+                className="text-xs text-gray-500 hover:text-gray-700"
               >
-                Clear selection
+                Clear
               </button>
             </div>
           </div>
         )}
 
-        <div className="overflow-x-auto">
+        <div className="mt-4 overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -196,12 +191,12 @@ const StudentDetails = ({ onSelectStudent }) => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredStudents.map((student) => (
                 <tr 
-                  key={student._id} 
-                  className={`transition-colors duration-300 ${
+                  key={student._id}
+                  className={`${
                     selectedStudentId === student._id 
-                      ? 'bg-indigo-50 border-l-4 border-indigo-500' 
+                      ? 'bg-blue-50 border-l-4 border-blue-500' 
                       : 'hover:bg-gray-50 border-l-4 border-transparent'
-                  }`}
+                  } transition-colors duration-200`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">{student.name}</div>
@@ -212,24 +207,24 @@ const StudentDetails = ({ onSelectStudent }) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={() => handleEditSocialMedia(student)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="text-blue-600 hover:text-blue-900"
                     >
                       Edit Social Media
                     </button>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3">
                       {selectedStudentId === student._id ? (
-                        <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        <span className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                          <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                           Selected
                         </span>
                       ) : (
                         <button
                           onClick={() => handleSelectStudent(student)}
-                          className="inline-flex items-center px-3 py-1 border border-indigo-200 bg-indigo-50 text-indigo-700 rounded-md hover:bg-indigo-100 transition-colors"
+                          className="inline-flex items-center px-3 py-1 border border-blue-200 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors"
                         >
                           Select
                         </button>
