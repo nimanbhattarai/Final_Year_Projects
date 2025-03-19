@@ -51,6 +51,15 @@ export const studentApi = {
   login: (credentials) => api.post('/student/login', credentials),
   getProfile: (id) => api.get(`/student/${id}/profile`),
   getAnalysis: (id) => api.get(`/student/${id}/analysis`),
+  uploadPhoto: (id, photoFile) => {
+    const formData = new FormData();
+    formData.append('photo', photoFile);
+    return api.post(`/student/${id}/photo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
 };
 
 export const performanceApi = {

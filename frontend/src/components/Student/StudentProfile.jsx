@@ -4,51 +4,33 @@ import { User, Book, Award, MessageSquare, GraduationCap, Facebook, Instagram, L
 import toast from "react-hot-toast";
 
 const StudentProfile = () => {
-  const [profile, setProfile] = useState({});
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
   const studentId = localStorage.getItem("studentId");
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const response = await studentApi.getProfile(studentId);
-      let data = response.data;
-
-      console.log("API Raw Response:", data); // Log raw response
-
-      // 🔥 Ensure academic data is properly structured
-      if (
-        data.performance?.academic &&
-        Array.isArray(data.performance.academic)
-      ) {
-        data.performance.academic = data.performance.academic.map(
-          (yearData) => ({
-            year: yearData.year,
-            semesters: yearData.semesters.map((sem) => ({
-              semester: sem.semester,
-              subjects: sem.subjects || [],
-            })),
-          })
-        );
+    const fetchProfile = async () => {
+      try {
+        const response = await studentApi.getProfile(studentId);
+        setProfile(response.data);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      console.log("Formatted Data:", data); // Check the new format
-
-      setProfile(data);
-    } catch (error) {
-      console.error("API Error:", error);
-      toast.error("Failed to fetch profile");
+    if (studentId) {
+      fetchProfile();
     }
-  };
+  }, [studentId]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   if (!profile) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
-      </div>
-    );
+    return <div>No profile data available</div>;
   }
 
   // Ensure performance fields are properly handled

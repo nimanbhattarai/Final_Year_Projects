@@ -199,7 +199,23 @@ const StudentDetails = ({ onSelectStudent }) => {
                   } transition-colors duration-200`}
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{student.name}</div>
+                    <div className="flex items-center space-x-4 mb-6">
+                      {student.photo ? (
+                        <img 
+                          src={student.photo} 
+                          alt={`${student.name}'s photo`} 
+                          className="h-16 w-16 rounded-full object-cover shadow-sm"
+                        />
+                      ) : (
+                        <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center">
+                          <User className="h-8 w-8 text-gray-400" />
+                        </div>
+                      )}
+                      <div>
+                        <h2 className="text-xl font-bold">{student.name}</h2>
+                        <p className="text-gray-600">{student.email}</p>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">{student.email}</div>
