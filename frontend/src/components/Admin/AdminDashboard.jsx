@@ -108,7 +108,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1">
+      <div className="flex-1 pt-20">
         {/* Header with back button and selected student */}
         <header className="bg-white shadow-sm py-4 px-6">
           <div className="flex items-center justify-between">

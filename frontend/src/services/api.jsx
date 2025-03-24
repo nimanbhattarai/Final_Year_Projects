@@ -31,7 +31,28 @@ api.interceptors.response.use(
 export const adminApi = {
   login: (credentials) => api.post('/admin/login', credentials),
   getStudents: () => api.get('/admin/students'),
-  registerStudent: (data) => api.post('/student/register', data),
+  
+  // Update to accept photo upload
+  registerStudent: (data) => {
+    // If data contains a photo file, use FormData
+    if (data.photo instanceof File) {
+      const formData = new FormData();
+      formData.append('name', data.name);
+      formData.append('email', data.email);
+      formData.append('password', data.password);
+      formData.append('photo', data.photo);
+      
+      return api.post('/student/register', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    }
+    
+    // Otherwise, use regular JSON
+    return api.post('/student/register', data);
+  },
+  
   deleteStudent: (studentId) => api.delete(`/admin/student/${studentId}`),
   updateStudentData: (data) => api.put('/admin/student/update', data),
   getStudentGrades: (studentId) => api.get(`/performance/${studentId}`),
@@ -45,6 +66,18 @@ export const adminApi = {
     studentId, 
     data: {}  // Empty data to just get student info back
   }),
+  
+  // Add method to update student photo
+  uploadStudentPhoto: (studentId, photoFile) => {
+    const formData = new FormData();
+    formData.append('photo', photoFile);
+    
+    return api.post(`/student/${studentId}/photo`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+  }
 };
 
 export const studentApi = {
@@ -54,10 +87,17 @@ export const studentApi = {
   uploadPhoto: (id, photoFile) => {
     const formData = new FormData();
     formData.append('photo', photoFile);
+    
     return api.post(`/student/${id}/photo`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        console.log(`Upload progress: ${percentCompleted}%`);
+      }
     });
   }
 };

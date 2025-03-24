@@ -1,6 +1,7 @@
 const Student = require("../models/Student");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { uploadToCloudinary } = require('../utils/cloudinaryUpload');
 
 // Student Login
 const loginStudent = async (req, res) => {
@@ -74,6 +75,7 @@ const getProfile = async (req, res) => {
       name: student.name,
       email: student.email,
       socialMedia: student.socialMedia || {},
+      photo: student.photo,
       performance: {
         academic: academicYears, // ✅ Now structured properly
         extracurricular: student.performance.extracurricular || [],
@@ -118,39 +120,62 @@ const academicAnalysis = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// Register a New Student
-const registerStudent = async (req, res) => {
-  const { name, email, password, socialMedia } = req.body;
 
+// Update registerStudent to handle photo upload
+const registerStudent = async (req, res) => {
   try {
-    // Check if the student already exists
-    const existingStudent = await Student.findOne({ email });
-    if (existingStudent) {
-      return res.status(400).json({ message: "Student already exists" });
+    const { name, email, password } = req.body;
+
+    // Check if student already exists
+    const studentExists = await Student.findOne({ email });
+    if (studentExists) {
+      return res.status(400).json({
+        success: false,
+        message: "Student already exists",
+      });
     }
 
-    // Hash the password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create a new student
-    const newStudent = new Student({
+    // Process photo upload if exists
+    let photoUrl = "";
+    if (req.file) {
+      try {
+        const uploadResult = await uploadToCloudinary(req.file.buffer);
+        photoUrl = uploadResult.secure_url;
+      } catch (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        // Continue with registration even if photo upload fails
+      }
+    }
+
+    // Create student
+    const student = await Student.create({
       name,
       email,
       password: hashedPassword,
-      socialMedia: socialMedia || {},
-      performance: {
-        academic: {},
-        extracurricular: [],
-        teacherRemarks: [],
-      },
+      photo: photoUrl, // Add photo URL
     });
 
-    // Save the student to the database
-    await newStudent.save();
-
-    res.status(201).json({ message: "Student registered successfully", student: newStudent });
+    res.status(201).json({
+      success: true,
+      data: {
+        _id: student._id,
+        name: student.name,
+        email: student.email,
+        photo: student.photo,
+      },
+      message: "Student registered successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Register error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Registration failed",
+      error: error.message,
+    });
   }
 };
 
@@ -186,14 +211,132 @@ const getAcademicRecords = async (req, res) => {
   }
 };
 
+// Upload student photo handler
+const uploadPhoto = async (req, res) => {
+  try {
+    // Log the request for debugging
+    console.log("Photo upload request received:", {
+      file: req.file ? "File attached" : "No file",
+      studentId: req.params.studentId,
+      user: req.user // From auth middleware
+    });
+    
+    // Check if file exists in request
+    if (!req.file) {
+      console.log("No file in request");
+      return res.status(400).json({
+        success: false,
+        message: 'No image file provided'
+      });
+    }
+    
+    const studentId = req.params.studentId;
+    console.log("Student ID:", studentId);
+    
+    // Find student in database
+    const student = await Student.findById(studentId);
+    console.log("Student found:", student ? "Yes" : "No");
+    
+    if (!student) {
+      return res.status(404).json({
+        success: false, 
+        message: 'Student not found'
+      });
+    }
+    
+    try {
+      // Upload to Cloudinary
+      console.log("Uploading to Cloudinary...");
+      const uploadResult = await uploadToCloudinary(req.file.buffer, {
+        public_id: `student_${studentId}_${Date.now()}`
+      });
+      console.log(uploadResult)
+      console.log("Cloudinary upload successful:", uploadResult.secure_url);
+      
+      // Update student record with new photo URL
+      student.photo = uploadResult.secure_url;
+      console.log("Saving student with new photo URL:", student.photo);
+      
+      // Force save with explicit markModified
+      student.markModified('photo');
+      const updatedStudent = await student.save();
+      console.log("Student saved successfully:", updatedStudent.photo);
+      
+      // Return success response
+      return res.status(200).json({
+        success: true,
+        data: {
+          photoUrl: updatedStudent.photo,
+          publicId: uploadResult.public_id
+        },
+        message: 'Photo uploaded successfully'
+      });
+    } catch (uploadError) {
+      console.error('Cloudinary upload error:', uploadError);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to upload image to cloud storage',
+        error: uploadError.message
+      });
+    }
+  } catch (error) {
+    console.error('Server error during photo upload:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error processing upload',
+      error: error.message
+    });
+  }
+};
 
+// Test function to debug Cloudinary uploads
+const testCloudinaryUpload = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file provided' });
+    }
+    
+    console.log("Test upload - file received:", req.file.originalname);
+    
+    try {
+      // Try uploading to Cloudinary
+      const result = await uploadToCloudinary(req.file.buffer, {
+        public_id: `test_${Date.now()}`
+      });
+      
+      console.log("Upload successful:", result.secure_url);
+      
+      return res.status(200).json({
+        success: true,
+        message: 'Test upload successful',
+        imageUrl: result.secure_url
+      });
+    } catch (error) {
+      console.error("Cloudinary error:", error);
+      return res.status(500).json({
+        success: false,
+        message: 'Cloudinary upload failed',
+        error: error.message
+      });
+    }
+  } catch (error) {
+    console.error("Test upload error:", error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server error',
+      error: error.message
+    });
+  }
+};
 
 module.exports = {
   loginStudent,
   getProfile,
   academicAnalysis,
-  registerStudent, // Export the new function
-  getAcademicRecords
+  registerStudent,
+  getAcademicRecords,
+  uploadPhoto,
+  testCloudinaryUpload,
 };
 
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
 import { Search, UserPlus, Trash2, User } from 'lucide-react';
 import toast from 'react-hot-toast';
+import PhotoUploader from './PhotoUploader';
 
 const StudentDetails = ({ onSelectStudent }) => {
   const [students, setStudents] = useState([]);
@@ -27,6 +28,11 @@ const StudentDetails = ({ onSelectStudent }) => {
     }
   });
   const [selectedStudentId, setSelectedStudentId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [photo, setPhoto] = useState(null);
+  const [photoPreview, setPhotoPreview] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     fetchStudents();
@@ -43,24 +49,73 @@ const StudentDetails = ({ onSelectStudent }) => {
 
   const handleAddStudent = async (e) => {
     e.preventDefault();
+    
+    // Validate form
+    if (!newStudent.name || !newStudent.email || !newStudent.password) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+    
+    // Validate photo if provided
+    if (photo) {
+      // Check file size (5MB max)
+      if (photo.size > 5 * 1024 * 1024) {
+        toast.error('Photo size must be less than 5MB');
+        return;
+      }
+      
+      // Check file type
+      if (!photo.type.startsWith('image/')) {
+        toast.error('Only image files are allowed for photo');
+        return;
+      }
+    }
+    
+    setSubmitting(true);
+    
     try {
-      await adminApi.registerStudent(newStudent);
-      toast.success('Student added successfully');
-      setShowAddForm(false);
-      setNewStudent({ 
-        name: '', 
-        email: '', 
-        password: '', 
-        socialMedia: {
-          facebook: '',
-          instagram: '',
-          linkedin: '',
-          github: ''
-        }
-      });
-      fetchStudents();
+      // Create form data for mixed content (file + text)
+      const formData = new FormData();
+      formData.append('name', newStudent.name);
+      formData.append('email', newStudent.email);
+      formData.append('password', newStudent.password);
+      
+      // Only append photo if it exists
+      if (photo) {
+        formData.append('photo', photo);
+      }
+      
+      // Send registration request
+      const response = await adminApi.registerStudent(formData);
+      
+      if (response.data.success) {
+        toast.success('Student added successfully');
+        
+        // Reset form
+        setNewStudent({
+          name: '',
+          email: '',
+          password: '',
+          socialMedia: {
+            facebook: '',
+            instagram: '',
+            linkedin: '',
+            github: ''
+          }
+        });
+        setPhoto(null);
+        setPhotoPreview(null);
+        
+        // Refresh student list
+        fetchStudents();
+      } else {
+        toast.error(response.data.message || 'Failed to add student');
+      }
     } catch (error) {
-      toast.error('Failed to add student');
+      console.error('Registration error:', error);
+      toast.error(error.response?.data?.message || 'An error occurred');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -113,6 +168,21 @@ const StudentDetails = ({ onSelectStudent }) => {
         [platform]: value
       }
     });
+  };
+
+  const handlePhotoSelect = (file) => {
+    setPhoto(file);
+    
+    // Create preview
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoPreview(null);
+    }
   };
 
   const filteredStudents = students.filter(student =>
@@ -266,35 +336,57 @@ const StudentDetails = ({ onSelectStudent }) => {
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold mb-4">Add New Student</h3>
             <form onSubmit={handleAddStudent} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input
-                  type="text"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  value={newStudent.name}
-                  onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input
-                  type="email"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  value={newStudent.email}
-                  onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input
-                  type="password"
-                  required
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  value={newStudent.password}
-                  onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
-                />
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="md:w-1/4 flex justify-center">
+                  <PhotoUploader 
+                    onPhotoSelect={handlePhotoSelect} 
+                    currentPhoto={photoPreview}
+                  />
+                </div>
+                
+                <div className="md:w-3/4 space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                      Full Name*
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={newStudent.name}
+                      onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                      Email Address*
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={newStudent.email}
+                      onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                      Password*
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      value={newStudent.password}
+                      onChange={(e) => setNewStudent({ ...newStudent, password: e.target.value })}
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                </div>
               </div>
               
               {/* Social Media Section */}
@@ -354,9 +446,12 @@ const StudentDetails = ({ onSelectStudent }) => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  disabled={submitting}
+                  className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 ${
+                    submitting ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
                 >
-                  Add Student
+                  {submitting ? 'Adding...' : 'Add Student'}
                 </button>
               </div>
             </form>
