@@ -134,7 +134,7 @@ const BestPerformingPage = () => {
       setStudents(response.data || []);
     } catch (error) {
       console.error('Error fetching student data:', error);
-      toast.error('Failed to fetch student performance data');
+      // toast.error('Failed to fetch student performance data');
     } finally {
       setLoading(false);
     }
