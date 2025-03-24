@@ -47,8 +47,8 @@ const getProfile = async (req, res) => {
   const { studentId } = req.params;
 
   try {
-    const student = await Student.findById(studentId)
-      .select('_id name email photo socialMedia createdAt'); // Ensure 'photo' is included here
+    // 🔥 Fetch student and convert it to a plain JSON object
+    const student = await Student.findById(studentId).lean();
 
     if (!student) {
       return res.status(404).json({ message: "Student not found" });

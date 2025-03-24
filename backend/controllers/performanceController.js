@@ -292,16 +292,6 @@ const deleteTeacherRemarks = async (req, res) => {
   }
 };
 
-const calculateTotalScore = (student) => {
-  const academicScore = student.performance.academicScore || 0;
-  const extracurricularScore = student.performance.extraCurricularScore || 0;
-  const remarksScore = student.performance.remarksScore || 0;
-
-  // Example weights
-  const totalScore = (academicScore * 0.7) + (extracurricularScore * 0.2) + (remarksScore * 0.1);
-  return Math.round(totalScore);
-};
-
 module.exports = {
   updateAcademicGrades,
   updateExtracurricularGrades,
