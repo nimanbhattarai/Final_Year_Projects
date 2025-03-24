@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { performanceApi } from '../services/api';
+import { performanceApi, adminApi } from '../services/api';
 import { Trophy, Star, TrendingUp, Users, Award, BookOpen, MessageSquare, Filter, ChevronDown, ChevronUp, Crown, Medal, TrendingDown, BarChart4, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { Snackbar, Alert } from '@mui/material';
 
 const BestPerformingPage = () => {
   const [students, setStudents] = useState([]);
@@ -9,9 +10,12 @@ const BestPerformingPage = () => {
   const [activeTab, setActiveTab] = useState('overall');
   const [filterYear, setFilterYear] = useState('all');
   const [sortConfig, setSortConfig] = useState({ key: 'totalScore', direction: 'desc' });
+  const [bestStudent, setBestStudent] = useState(null);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     fetchStudents();
+    fetchBestPerformingStudent();
   }, []);
 
   const fetchStudents = async () => {
@@ -133,6 +137,15 @@ const BestPerformingPage = () => {
       toast.error('Failed to fetch student performance data');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchBestPerformingStudent = async () => {
+    try {
+      const response = await adminApi.getBestPerformingStudent();
+      setBestStudent(response.data.bestStudent);
+    } catch (error) {
+      setSnackbar({ open: true, message: 'Failed to fetch best performing student', severity: 'error' });
     }
   };
 
@@ -739,6 +752,20 @@ const BestPerformingPage = () => {
       <div className="mt-12 text-center text-gray-500 text-sm">
         <p>Student performance rankings are calculated based on academic scores (70%), extracurricular activities (20%), and teacher remarks (10%).</p>
       </div>
+
+      
+
+      {/* Snackbar Notification */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setSnackbar({ ...snackbar, open: false })} severity={snackbar.severity}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </div>
   );
 };

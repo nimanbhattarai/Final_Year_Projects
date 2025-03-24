@@ -3,6 +3,7 @@ import { adminApi } from '../../services/api';
 import { Search, UserPlus, Trash2, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PhotoUploader from './PhotoUploader';
+import { useNavigate } from 'react-router-dom';
 
 const StudentDetails = ({ onSelectStudent }) => {
   const [students, setStudents] = useState([]);
@@ -33,6 +34,7 @@ const StudentDetails = ({ onSelectStudent }) => {
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchStudents();
@@ -108,6 +110,10 @@ const StudentDetails = ({ onSelectStudent }) => {
         
         // Refresh student list
         fetchStudents();
+
+        // Redirect to the Academic Grades section for the newly added student
+        const newStudentId = response.data._id;
+        navigate(`/admin/academic/${newStudentId}`);
       } else {
         toast.error(response.data.message || 'Failed to add student');
       }

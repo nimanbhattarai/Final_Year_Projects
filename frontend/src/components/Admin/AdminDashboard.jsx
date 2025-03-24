@@ -120,17 +120,17 @@ const AdminDashboard = () => {
               <span className="font-medium">Back</span>
             </button>
             
-            {selectedStudent && !location.pathname.includes('/academic/') && (
-              <div className="animate-fadeIn flex items-center px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
+            {selectedStudent && (
+              <div className="flex items-center px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-lg shadow-sm">
                 <div className="bg-indigo-100 p-2 rounded-full mr-3">
                   {selectedStudent.photo ? (
                     <img 
                       src={selectedStudent.photo} 
                       alt="Student" 
-                      className="w-5 h-5 rounded-full object-cover"
+                      className="w-12 h-12 rounded-full object-cover"
                     />
                   ) : (
-                    <User className="h-5 w-5 text-indigo-600" />
+                    <User className="h-12 w-12 text-indigo-600" />
                   )}
                 </div>
                 <div>

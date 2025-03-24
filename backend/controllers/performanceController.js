@@ -204,35 +204,17 @@ const getBestPerformingStudent = async (req, res) => {
       return res.status(404).json({ message: "No students found" });
     }
 
-    // Analyze performance
     const bestStudent = students.reduce((best, student) => {
-      const totalAcademic = Object.values(student.performance.academic || {})
-        .flatMap((year) => Object.values(year))
-        .reduce((sum, grades) => {
-          // Ensure grades is an array before calling reduce
-          if (Array.isArray(grades)) {
-            return sum + grades.reduce((a, b) => a + b, 0);
-          }
-          return sum;
-        }, 0);
-
-      const totalExtraCurricular = (student.performance.extracurricular || []).reduce(
-        (sum, activity) => sum + (activity.grade || 0),
-        0
-      );
-
-      const totalTeacherRemarks = (student.performance.teacherRemarks || []).reduce(
-        (sum, remark) => sum + (remark.grade || 0),
-        0
-      );
-
-      const totalScore = totalAcademic + totalExtraCurricular + totalTeacherRemarks;
-
+      // Calculate total score or performance metrics
+      const totalScore = calculateTotalScore(student); // Ensure this function is defined and works correctly
       return totalScore > best.score ? { student, score: totalScore } : best;
     }, { student: null, score: 0 });
 
     res.status(200).json({
-      bestStudent: bestStudent.student,
+      bestStudent: {
+        ...bestStudent.student.toObject(),
+        photo: bestStudent.student.photo // Include photo if needed
+      },
       totalScore: bestStudent.score,
     });
   } catch (error) {
@@ -308,6 +290,16 @@ const deleteTeacherRemarks = async (req, res) => {
     console.error('Error deleting teacher remark:', error);
     res.status(500).json({ message: error.message });
   }
+};
+
+const calculateTotalScore = (student) => {
+  const academicScore = student.performance.academicScore || 0;
+  const extracurricularScore = student.performance.extraCurricularScore || 0;
+  const remarksScore = student.performance.remarksScore || 0;
+
+  // Example weights
+  const totalScore = (academicScore * 0.7) + (extracurricularScore * 0.2) + (remarksScore * 0.1);
+  return Math.round(totalScore);
 };
 
 module.exports = {
