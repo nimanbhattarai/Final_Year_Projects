@@ -26,7 +26,7 @@ const StudentInfo = ({ selectedStudent }) => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-8">
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-white/10 rounded-lg">
+            <div className="p-3 rounded-lg">
               {selectedStudent.photo && (
                 <img 
                   src={selectedStudent.photo} 
