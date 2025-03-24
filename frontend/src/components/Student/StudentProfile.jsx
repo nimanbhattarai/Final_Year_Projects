@@ -64,7 +64,7 @@ const StudentProfile = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-8">
           <div className="flex items-center space-x-4">
-            <div className="p-3 bg-white/10 rounded-lg">
+            <div className="p-3 rounded-lg">
               {profile.photo ? (
                 <div className="relative">
                   <img 

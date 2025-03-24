@@ -12,12 +12,14 @@ const StudentPage = () => {
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [studentName, setStudentName] = useState('');
+  const [studentPhoto, setStudentPhoto] = useState('');
   
   useEffect(() => {
     const fetchStudentData = async () => {
       try {
         const response = await studentApi.getProfile(studentId);
         setStudentName(response.data.name || 'Student');
+        setStudentPhoto(response.data.photo);
       } catch (error) {
         console.error('Error fetching student data:', error);
       }
@@ -51,7 +53,7 @@ const StudentPage = () => {
             <div className="flex flex-col flex-grow px-4 py-6 overflow-y-auto">
               <div className="text-center mb-8">
                 <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                  <User className="h-10 w-10" />
+                  <img src={studentPhoto} alt="Student Photo" className="h-20 w-20 rounded-full" />
                 </div>
                 <h3 className="mt-2 text-xl font-medium text-gray-900">
                   {studentName}
@@ -108,7 +110,7 @@ const StudentPage = () => {
               
               <div className="text-center my-6">
                 <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-                  <User className="h-8 w-8" />
+                  <img src={studentPhoto} alt="Student Photo" className="h-16 w-16 rounded-full" />
                 </div>
                 <h3 className="mt-2 text-lg font-medium text-gray-900">
                   {studentName}
