@@ -220,8 +220,16 @@ const StudentDetails = ({ onSelectStudent }) => {
           <div className="mb-4 bg-indigo-50 border border-indigo-100 rounded-md p-2">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <div className="bg-indigo-100 p-1 rounded-full">
-                  <User className="h-4 w-4 text-indigo-600" />
+                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
+                  {students.find(s => s._id === selectedStudentId)?.photo ? (
+                    <img 
+                      src={students.find(s => s._id === selectedStudentId)?.photo} 
+                      alt="Student" 
+                      className="w-full h-full rounded-full object-cover"
+                    />
+                  ) : (
+                    students.find(s => s._id === selectedStudentId)?.name.charAt(0)
+                  )}
                 </div>
                 <div>
                   <span className="text-sm text-gray-600">Selected:</span>{' '}
@@ -270,17 +278,17 @@ const StudentDetails = ({ onSelectStudent }) => {
                 >
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-4 mb-6">
-                      {student.photo ? (
-                        <img 
-                          src={student.photo} 
-                          alt={`${student.name}'s photo`} 
-                          className="h-16 w-16 rounded-full object-cover shadow-sm"
-                        />
-                      ) : (
-                        <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center">
-                          <User className="h-8 w-8 text-gray-400" />
-                        </div>
-                      )}
+                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
+                        {student.photo ? (
+                          <img 
+                            src={student.photo} 
+                            alt="Student" 
+                            className="w-full h-full rounded-full object-cover"
+                          />
+                        ) : (
+                          student.name.charAt(0)
+                        )}
+                      </div>
                       <div>
                         <h2 className="text-xl font-bold">{student.name}</h2>
                         <p className="text-gray-600">{student.email}</p>

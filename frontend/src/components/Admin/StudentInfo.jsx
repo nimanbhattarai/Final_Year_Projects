@@ -27,7 +27,13 @@ const StudentInfo = ({ selectedStudent }) => {
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-8">
           <div className="flex items-center space-x-4">
             <div className="p-3 bg-white/10 rounded-lg">
-              <User className="h-12 w-12 text-white" />
+              {selectedStudent.photo && (
+                <img 
+                  src={selectedStudent.photo} 
+                  alt="Student" 
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              )}
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white mb-1">{selectedStudent.name}</h1>

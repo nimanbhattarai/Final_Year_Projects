@@ -143,11 +143,21 @@ const AcademicGrades = ({ selectedStudent }) => {
           </div>
           
           {selectedStudent && (
-            <div className="flex items-center bg-indigo-50 px-3 py-1.5 rounded-lg">
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
-                {selectedStudent.name ? selectedStudent.name.charAt(0) : 'S'}
-              </div>
-              <span className="text-sm font-medium text-indigo-800">{selectedStudent.name}</span>
+            <div className="flex items-center space-x-4">
+              {selectedStudent.photo ? (
+                <img 
+                  src={selectedStudent.photo} 
+                  alt="Student" 
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                  <span className="text-xl font-bold text-indigo-600">
+                    {selectedStudent.name.charAt(0)}
+                  </span>
+                </div>
+              )}
+              <span className="text-lg font-semibold">{selectedStudent.name}</span>
             </div>
           )}
         </div>

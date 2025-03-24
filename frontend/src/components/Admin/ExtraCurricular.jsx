@@ -133,17 +133,20 @@ const ExtraCurricular = ({ selectedStudent }) => {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">Extra-Curricular Activities</h2>
-              <p className="text-sm text-gray-500 mt-1">
-                Manage {selectedStudent.name}'s extra-curricular achievements
-              </p>
-            </div>
-            <div className="flex items-center bg-indigo-50 px-3 py-1.5 rounded-lg">
-              <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
-                {selectedStudent.name.charAt(0)}
+            <div className="flex items-center space-x-4">
+              {selectedStudent.photo && (
+                <img 
+                  src={selectedStudent.photo} 
+                  alt="Student" 
+                  className="w-12 h-12 rounded-full object-cover"
+                />
+              )}
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Extra-Curricular Activities</h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Manage {selectedStudent.name}'s extra-curricular achievements
+                </p>
               </div>
-              <span className="text-sm font-medium text-indigo-800">{selectedStudent.name}</span>
             </div>
           </div>
         </div>
