@@ -1,7 +1,9 @@
 const Student = require("../models/Student");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const { uploadToCloudinary } = require('../utils/cloudinaryUpload');
+const { generateRandomPassword, sendPasswordEmail, retryEmailSending } = require("../utils/mailUtils");
 
 // Student Login
 const loginStudent = async (req, res) => {
@@ -194,7 +196,7 @@ const getAcademicRecords = async (req, res) => {
     }
 
     const academicData = student.performance.academic;
-    
+
     let academicYears = Object.keys(academicData)
       .filter(key => !key.startsWith("$"))
       .map(year => ({
@@ -220,7 +222,7 @@ const uploadPhoto = async (req, res) => {
       studentId: req.params.studentId,
       user: req.user // From auth middleware
     });
-    
+
     // Check if file exists in request
     if (!req.file) {
       console.log("No file in request");
@@ -229,21 +231,21 @@ const uploadPhoto = async (req, res) => {
         message: 'No image file provided'
       });
     }
-    
+
     const studentId = req.params.studentId;
     console.log("Student ID:", studentId);
-    
+
     // Find student in database
     const student = await Student.findById(studentId);
     console.log("Student found:", student ? "Yes" : "No");
-    
+
     if (!student) {
       return res.status(404).json({
-        success: false, 
+        success: false,
         message: 'Student not found'
       });
     }
-    
+
     try {
       // Upload to Cloudinary
       console.log("Uploading to Cloudinary...");
@@ -252,16 +254,16 @@ const uploadPhoto = async (req, res) => {
       });
       console.log(uploadResult)
       console.log("Cloudinary upload successful:", uploadResult.secure_url);
-      
+
       // Update student record with new photo URL
       student.photo = uploadResult.secure_url;
       console.log("Saving student with new photo URL:", student.photo);
-      
+
       // Force save with explicit markModified
       student.markModified('photo');
       const updatedStudent = await student.save();
       console.log("Student saved successfully:", updatedStudent.photo);
-      
+
       // Return success response
       return res.status(200).json({
         success: true,
@@ -295,17 +297,17 @@ const testCloudinaryUpload = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file provided' });
     }
-    
+
     console.log("Test upload - file received:", req.file.originalname);
-    
+
     try {
       // Try uploading to Cloudinary
       const result = await uploadToCloudinary(req.file.buffer, {
         public_id: `test_${Date.now()}`
       });
-      
+
       console.log("Upload successful:", result.secure_url);
-      
+
       return res.status(200).json({
         success: true,
         message: 'Test upload successful',
@@ -329,6 +331,171 @@ const testCloudinaryUpload = async (req, res) => {
   }
 };
 
+const dataSaving = async (req, res) => {
+  try {
+    const data = req.body;
+
+    const academicData = {
+      year1: {
+        semester1: {
+          sgpa: Number(data.sem1SGPA),
+          subjects: [
+            { subject: 'Mathematics For Computing - I', marks: Number(data.math1) },
+            { subject: 'Physics For Computing', marks: Number(data.physics) },
+            { subject: 'Computer Aided Drafting', marks: Number(data.cad) },
+            { subject: 'Digital Electronics', marks: Number(data.digitalElectronics) },
+            { subject: 'Structured Programming', marks: Number(data.structuredProgramming) },
+            { subject: 'Computer System Workshop Technology', marks: Number(data.cswt) },
+          ],
+        },
+        semester2: {
+          sgpa: Number(data.sem2SGPA),
+          subjects: [
+            { subject: 'Mathematics For Computing - II', marks: Number(data.math2) },
+            { subject: 'Organic & ElectroChemistry', marks: Number(data.chemistry) },
+            { subject: 'Electrical Technology', marks: Number(data.electrical) },
+            { subject: 'Object Oriented Programming', marks: Number(data.oop) },
+            { subject: 'Programming Paradigms', marks: Number(data.pp) },
+            { subject: 'Web Programming', marks: Number(data.wp) },
+          ],
+        }
+      },
+      year2: {
+        semester3: {
+          sgpa: Number(data.sem3SGPA),
+          subjects: [
+            { subject: 'Discrete Structures & Graph Theory', marks: Number(data.dsgt) },
+            { subject: 'Data Structures', marks: Number(data.ds) },
+            { subject: 'Database Management Systems', marks: Number(data.dbms) },
+            { subject: 'Software Engineering (ITC-I)', marks: Number(data.se) },
+            { subject: 'Computer Communication & Network', marks: Number(data.cn) },
+            { subject: 'IT Lab I', marks: Number(data.itl_1) },
+            { subject: 'Vocational Course I', marks: Number(data.vc_1) },
+          ]
+        },
+        semester4: {
+          sgpa: Number(data.sem4SGPA),
+          subjects: [
+            { subject: 'Infrastructure Management (ITC-II)', marks: Number(data.infrastructureManagement) },
+            { subject: 'Formal Languages', marks: Number(data.formalLanguages) },
+            { subject: 'Microcontrollers', marks: Number(data.microcontrollers) },
+            { subject: 'Applied Algorithms', marks: Number(data.appliedAlgorithms) },
+            { subject: 'Operating Systems', marks: Number(data.operatingSystems) },
+            { subject: 'IT Lab II', marks: Number(data.itl_2) },
+            { subject: 'Vocational Course II', marks: Number(data.vc_2) },
+          ]
+        }
+      },
+      year3: {
+        semester5: {
+          sgpa: Number(data.sem5SGPA),
+          subjects: [
+            { subject: 'Human Computer Interaction', marks: Number(data.hci) },
+            { subject: 'AI & ML', marks: Number(data.aiml) },
+            { subject: 'Computer Architecture & Organization', marks: Number(data.cao) },
+            { subject: 'Advanced DBMS (ITC-III)', marks: Number(data.advDbms) },
+            { subject: 'Mobile App Development', marks: Number(data.mad) },
+            { subject: 'IT Lab III', marks: Number(data.itl_3) },
+            { subject: 'Vocational Course III', marks: Number(data.vc_3) },
+          ]
+        },
+        semester6: {
+          sgpa: Number(data.sem6SGPA),
+          subjects: [
+            { subject: 'Cloud Computing (ITC-IV)', marks: Number(data.cloudComputing) },
+            { subject: 'Software Testing & Quality Assurance', marks: Number(data.stqa) },
+            { subject: 'Data Warehousing & Data Mining', marks: Number(data.dwdm) },
+            { subject: 'Quantitative Techniques, Communication and Values', marks: Number(data.qt_communication_values) },
+            { subject: 'Agile Methodologies', marks: Number(data.agile) },
+            { subject: 'IT Lab IV', marks: Number(data.itl_4) },
+            { subject: 'Vocational Course IV', marks: Number(data.vc_4) },
+          ]
+        }
+      },
+      year4: {
+        semester7: {
+          sgpa: Number(data.sem7SGPA),
+          subjects: [
+            { subject: 'Project Planning & Management', marks: Number(data.ppm) },
+            { subject: 'Web Services (ITC-V)', marks: Number(data.webServices) },
+            { subject: 'Business Intelligence', marks: Number(data.bi) },
+            { subject: 'Information Retrieval (Elective I)', marks: Number(data.ir) },
+            { subject: 'IT Lab V', marks: Number(data.itl_5) },
+            { subject: 'Internship', marks: Number(data.internship) },
+          ]
+        },
+        semester8: {
+          sgpa: Number(data.sem8SGPA),
+          subjects: [
+            { subject: 'Information Security', marks: Number(data.infoSecurity) },
+            { subject: 'Cyber Security (Elective II)', marks: Number(data.cyberSecurity) },
+            { subject: 'Internet of Things', marks: Number(data.iot) },
+            { subject: 'Data Engineering', marks: Number(data.dataEngineering) },
+            { subject: 'IT Lab VI', marks: Number(data.itl_6) },
+          ]
+        }
+      }
+    };
+
+    const formattedAcademic = new Map();
+
+    Object.entries(academicData).forEach(([year, semesters]) => {
+      const semesterMap = new Map();
+      Object.entries(semesters).forEach(([semester, value]) => {
+        semesterMap.set(semester, value.subjects);
+      });
+      formattedAcademic.set(year, { semester: semesterMap });
+    });
+
+    let existingStudent = Student.findOne({ email: data.email });
+    if (existingStudent) {
+      console.log("Student already exists...");
+      console.log("Updating the details....");
+
+      existingStudent.performance.academic = formattedAcademic;
+      await existingStudent.save();
+
+      return res.status(200).json({
+        message: "Data updated successfully"
+      });
+    } else {
+      console.log("Student dont exixts ");
+      console.log("Creating student data....");
+
+      const tempPassword = generateRandomPassword();
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+      const student = await Student.create({
+        name: data.name,
+        email: data.email,
+        prn: data.prn,
+        password: hashedPassword,
+        performance: {
+          academic: formattedAcademic
+        }
+      });
+
+      console.log("Student data created successfully", student);
+
+      const response = await sendPasswordEmail(student.email, tempPassword);
+      if (!response.valid) {
+        retryEmailSending(student.email, tempPassword);
+        res.status(301).json({
+          message: "Email sending successfully after retry"
+        });
+        return;
+      }
+    }
+
+
+    return res.status(200).json({
+      message: "Student crated successfully and credentials sent successfully"
+    });
+  } catch (error) {
+
+  }
+}
+
 module.exports = {
   loginStudent,
   getProfile,
@@ -337,6 +504,7 @@ module.exports = {
   getAcademicRecords,
   uploadPhoto,
   testCloudinaryUpload,
+  dataSaving
 };
 
 
