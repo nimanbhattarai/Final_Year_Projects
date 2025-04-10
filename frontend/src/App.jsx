@@ -8,6 +8,8 @@ import BestPerformingPage from './pages/BestPerformingPage';
 import ProtectedRoute from './components/Common/ProtectedRoute';
 import AdminLogin from './components/Admin/AdminLogin';
 import StudentLogin from './components/Student/StudentLogin';
+import UserForm from './components/User-Details/UserForm';
+
 
 function App() {
   return (
@@ -19,6 +21,7 @@ function App() {
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/student/login" element={<StudentLogin />} />
           <Route path="/best-performing" element={<BestPerformingPage />} />
+          <Route path="/user-form" element={<UserForm />} />
           <Route
             path="/admin/*"
             element={

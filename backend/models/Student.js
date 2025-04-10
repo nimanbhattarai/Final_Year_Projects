@@ -5,8 +5,8 @@ const studentSchema = mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    prn: {type: String, required: true},
-    address: { type: String, required: true},
+    prn: {type: String, required: false},
+    address: { type: String, required: false},
     photo: { type: String, default: "" },
     socialMedia: {
       facebook: { type: String, default: "" },

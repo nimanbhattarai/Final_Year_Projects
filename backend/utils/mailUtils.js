@@ -52,11 +52,11 @@ async function sendPasswordEmail(toEmail, password) {
     }
 }
 
-const password = generateRandomPassword();
+// const password = generateRandomPassword();
 
-setTimeout(() => {
-    sendPasswordEmail('nimanbhattarai1234@gmail.com', password);
-}, 4000);
+// setTimeout(() => {
+//     sendPasswordEmail('nimanbhattarai1234@gmail.com', password);
+// }, 4000);
 
 async function retryEmailSending(toEmail, password){
    const interval =  setTimeout(async () => {

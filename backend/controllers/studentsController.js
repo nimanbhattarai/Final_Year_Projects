@@ -337,9 +337,8 @@ const dataSaving = async (req, res) => {
 
     const academicData = {
       year1: {
-        semester1: {
-          sgpa: Number(data.sem1SGPA),
-          subjects: [
+        semester: {
+          semester1: [
             { subject: 'Mathematics For Computing - I', marks: Number(data.math1) },
             { subject: 'Physics For Computing', marks: Number(data.physics) },
             { subject: 'Computer Aided Drafting', marks: Number(data.cad) },
@@ -347,23 +346,19 @@ const dataSaving = async (req, res) => {
             { subject: 'Structured Programming', marks: Number(data.structuredProgramming) },
             { subject: 'Computer System Workshop Technology', marks: Number(data.cswt) },
           ],
-        },
-        semester2: {
-          sgpa: Number(data.sem2SGPA),
-          subjects: [
+          semester2: [
             { subject: 'Mathematics For Computing - II', marks: Number(data.math2) },
             { subject: 'Organic & ElectroChemistry', marks: Number(data.chemistry) },
             { subject: 'Electrical Technology', marks: Number(data.electrical) },
             { subject: 'Object Oriented Programming', marks: Number(data.oop) },
             { subject: 'Programming Paradigms', marks: Number(data.pp) },
             { subject: 'Web Programming', marks: Number(data.wp) },
-          ],
+          ]
         }
       },
       year2: {
-        semester3: {
-          sgpa: Number(data.sem3SGPA),
-          subjects: [
+        semester: {
+          semester3: [
             { subject: 'Discrete Structures & Graph Theory', marks: Number(data.dsgt) },
             { subject: 'Data Structures', marks: Number(data.ds) },
             { subject: 'Database Management Systems', marks: Number(data.dbms) },
@@ -371,11 +366,8 @@ const dataSaving = async (req, res) => {
             { subject: 'Computer Communication & Network', marks: Number(data.cn) },
             { subject: 'IT Lab I', marks: Number(data.itl_1) },
             { subject: 'Vocational Course I', marks: Number(data.vc_1) },
-          ]
-        },
-        semester4: {
-          sgpa: Number(data.sem4SGPA),
-          subjects: [
+          ],
+          semester4: [
             { subject: 'Infrastructure Management (ITC-II)', marks: Number(data.infrastructureManagement) },
             { subject: 'Formal Languages', marks: Number(data.formalLanguages) },
             { subject: 'Microcontrollers', marks: Number(data.microcontrollers) },
@@ -387,9 +379,8 @@ const dataSaving = async (req, res) => {
         }
       },
       year3: {
-        semester5: {
-          sgpa: Number(data.sem5SGPA),
-          subjects: [
+        semester: {
+          semester5: [
             { subject: 'Human Computer Interaction', marks: Number(data.hci) },
             { subject: 'AI & ML', marks: Number(data.aiml) },
             { subject: 'Computer Architecture & Organization', marks: Number(data.cao) },
@@ -397,11 +388,8 @@ const dataSaving = async (req, res) => {
             { subject: 'Mobile App Development', marks: Number(data.mad) },
             { subject: 'IT Lab III', marks: Number(data.itl_3) },
             { subject: 'Vocational Course III', marks: Number(data.vc_3) },
-          ]
-        },
-        semester6: {
-          sgpa: Number(data.sem6SGPA),
-          subjects: [
+          ],
+          semester6: [
             { subject: 'Cloud Computing (ITC-IV)', marks: Number(data.cloudComputing) },
             { subject: 'Software Testing & Quality Assurance', marks: Number(data.stqa) },
             { subject: 'Data Warehousing & Data Mining', marks: Number(data.dwdm) },
@@ -413,20 +401,16 @@ const dataSaving = async (req, res) => {
         }
       },
       year4: {
-        semester7: {
-          sgpa: Number(data.sem7SGPA),
-          subjects: [
+        semester: {
+          semester7: [
             { subject: 'Project Planning & Management', marks: Number(data.ppm) },
             { subject: 'Web Services (ITC-V)', marks: Number(data.webServices) },
             { subject: 'Business Intelligence', marks: Number(data.bi) },
             { subject: 'Information Retrieval (Elective I)', marks: Number(data.ir) },
             { subject: 'IT Lab V', marks: Number(data.itl_5) },
             { subject: 'Internship', marks: Number(data.internship) },
-          ]
-        },
-        semester8: {
-          sgpa: Number(data.sem8SGPA),
-          subjects: [
+          ],
+          semester8: [
             { subject: 'Information Security', marks: Number(data.infoSecurity) },
             { subject: 'Cyber Security (Elective II)', marks: Number(data.cyberSecurity) },
             { subject: 'Internet of Things', marks: Number(data.iot) },
@@ -436,65 +420,41 @@ const dataSaving = async (req, res) => {
         }
       }
     };
+    
 
-    const formattedAcademic = new Map();
+    const existingStudent = await Student.findOne({ email: data.email });
 
-    Object.entries(academicData).forEach(([year, semesters]) => {
-      const semesterMap = new Map();
-      Object.entries(semesters).forEach(([semester, value]) => {
-        semesterMap.set(semester, value.subjects);
-      });
-      formattedAcademic.set(year, { semester: semesterMap });
-    });
-
-    let existingStudent = Student.findOne({ email: data.email });
     if (existingStudent) {
-      console.log("Student already exists...");
-      console.log("Updating the details....");
-
-      existingStudent.performance.academic = formattedAcademic;
+      existingStudent.performance.academic = academicData;
       await existingStudent.save();
 
-      return res.status(200).json({
-        message: "Data updated successfully"
-      });
-    } else {
-      console.log("Student dont exixts ");
-      console.log("Creating student data....");
-
-      const tempPassword = generateRandomPassword();
-      const hashedPassword = await bcrypt.hash(tempPassword, 10);
-
-      const student = await Student.create({
-        name: data.name,
-        email: data.email,
-        prn: data.prn,
-        password: hashedPassword,
-        performance: {
-          academic: formattedAcademic
-        }
-      });
-
-      console.log("Student data created successfully", student);
-
-      const response = await sendPasswordEmail(student.email, tempPassword);
-      if (!response.valid) {
-        retryEmailSending(student.email, tempPassword);
-        res.status(301).json({
-          message: "Email sending successfully after retry"
-        });
-        return;
-      }
+      return res.status(200).json({ message: "Data updated successfully" });
     }
 
+    const tempPassword = generateRandomPassword();
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-    return res.status(200).json({
-      message: "Student crated successfully and credentials sent successfully"
+    const newStudent = await Student.create({
+      name: data.name,
+      email: data.email,
+      prn: data.prn,
+      password: hashedPassword,
+      performance: { academic: academicData }
     });
-  } catch (error) {
 
+    const response = await sendPasswordEmail(newStudent.email, tempPassword);
+    if (!response.valid) {
+      await retryEmailSending(newStudent.email, tempPassword);
+    }
+
+    return res.status(200).json({ message: "Student created successfully and credentials sent" });
+
+  } catch (error) {
+    console.error("Error saving data:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
   }
-}
+};
+
 
 module.exports = {
   loginStudent,
