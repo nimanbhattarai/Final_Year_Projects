@@ -21,6 +21,8 @@ const StudentDetails = ({ onSelectStudent }) => {
     name: '',
     email: '',
     password: '',
+    rollNumber: '',
+    prn: '',
     socialMedia: {
       facebook: '',
       instagram: '',
@@ -42,10 +44,23 @@ const StudentDetails = ({ onSelectStudent }) => {
 
   const fetchStudents = async () => {
     try {
+      setLoading(true);
       const response = await adminApi.getStudents();
-      setStudents(response.data);
+      if (response.data && Array.isArray(response.data)) {
+        setStudents(response.data);
+      } else if (response.data.students && Array.isArray(response.data.students)) {
+        setStudents(response.data.students);
+      } else {
+        console.error('Unexpected response format:', response.data);
+        toast.error('Failed to load students: Invalid data format');
+        setStudents([]);
+      }
     } catch (error) {
-      toast.error('Failed to fetch students');
+      console.error('Error fetching students:', error);
+      toast.error(error.response?.data?.message || 'Failed to fetch students');
+      setStudents([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,7 +68,7 @@ const StudentDetails = ({ onSelectStudent }) => {
     e.preventDefault();
     
     // Validate form
-    if (!newStudent.name || !newStudent.email || !newStudent.password) {
+    if (!newStudent.name || !newStudent.email || !newStudent.password || !newStudent.rollNumber || !newStudent.prn) {
       toast.error('Please fill all required fields');
       return;
     }
@@ -81,6 +96,8 @@ const StudentDetails = ({ onSelectStudent }) => {
       formData.append('name', newStudent.name);
       formData.append('email', newStudent.email);
       formData.append('password', newStudent.password);
+      formData.append('rollNumber', newStudent.rollNumber);
+      formData.append('prn', newStudent.prn);
       
       // Only append photo if it exists
       if (photo) {
@@ -98,6 +115,8 @@ const StudentDetails = ({ onSelectStudent }) => {
           name: '',
           email: '',
           password: '',
+          rollNumber: '',
+          prn: '',
           socialMedia: {
             facebook: '',
             instagram: '',
@@ -110,6 +129,9 @@ const StudentDetails = ({ onSelectStudent }) => {
         
         // Refresh student list
         fetchStudents();
+
+        // Close the form
+        setShowAddForm(false);
 
         // Redirect to the Academic Grades section for the newly added student
         const newStudentId = response.data._id;
@@ -191,10 +213,12 @@ const StudentDetails = ({ onSelectStudent }) => {
     }
   };
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredStudents = students && Array.isArray(students) 
+    ? students.filter(student =>
+        student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.email.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
 
   return (
     <div className="space-y-4">
@@ -282,7 +306,9 @@ const StudentDetails = ({ onSelectStudent }) => {
                       : 'hover:bg-gray-50 border-l-4 border-transparent'
                   } transition-colors duration-200`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap" 
+                          onClick={() => handleSelectStudent(student)}
+                  >
                     <div className="flex items-center space-x-4 mb-6">
                       <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
                         {student.photo ? (
@@ -314,20 +340,13 @@ const StudentDetails = ({ onSelectStudent }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-3">
-                      {selectedStudentId === student._id ? (
+                      {selectedStudentId === student._id && (
                         <span className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                           <svg className="w-4 h-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                             <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                           </svg>
                           Selected
                         </span>
-                      ) : (
-                        <button
-                          onClick={() => handleSelectStudent(student)}
-                          className="inline-flex items-center px-3 py-1 border border-blue-200 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors"
-                        >
-                          Select
-                        </button>
                       )}
                       <button
                         onClick={() => setShowDeleteConfirm(student)}
@@ -382,6 +401,34 @@ const StudentDetails = ({ onSelectStudent }) => {
                       id="email"
                       value={newStudent.email}
                       onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="rollNumber" className="block text-sm font-medium text-gray-700">
+                      Roll Number*
+                    </label>
+                    <input
+                      type="text"
+                      id="rollNumber"
+                      value={newStudent.rollNumber}
+                      onChange={(e) => setNewStudent({ ...newStudent, rollNumber: e.target.value })}
+                      required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="prn" className="block text-sm font-medium text-gray-700">
+                      PRN (Permanent Registration Number)*
+                    </label>
+                    <input
+                      type="text"
+                      id="prn"
+                      value={newStudent.prn}
+                      onChange={(e) => setNewStudent({ ...newStudent, prn: e.target.value })}
                       required
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />

@@ -7,7 +7,10 @@ const {
   getAcademicRecords,
   uploadPhoto,
   testCloudinaryUpload,
-  dataSaving
+  dataSaving,
+  forgotPassword,
+  resetPassword,
+  uploadProfilePhoto
 } = require("../controllers/studentsController");
 const upload = require("../middleware/uploadMiddleware");
 
@@ -34,6 +37,16 @@ router.post("/:studentId/photo", upload.single('photo'), uploadPhoto);
 // Test upload route
 router.post("/test-upload", upload.single('photo'), testCloudinaryUpload);
 
+// Data saving route
 router.post("/data/add", dataSaving);
+
+// Forgot password route
+router.post("/forgot-password", forgotPassword);
+
+// Reset password route
+router.post("/reset-password/:token", resetPassword);
+
+// Upload profile photo after login
+router.post("/upload-profile-photo", upload.single('photo'), uploadProfilePhoto);
 
 module.exports = router;

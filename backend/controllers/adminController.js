@@ -61,11 +61,33 @@ const loginAdmin = async (req, res) => {
   }
 };
 
-// Fetch All Students
+// Fetch All Students with pagination, sorting, and search
 const getStudents = async (req, res) => {
   try {
-    const students = await Student.find();
-    res.status(200).json(students);
+    const { page = 1, limit = 10, sort = 'name', search } = req.query;
+    const query = {};
+
+    // Add search by PRN if provided
+    if (search) {
+      query.prn = new RegExp(search, 'i');
+    }
+
+    // Get total count for pagination
+    const total = await Student.countDocuments(query);
+
+    // Get students with pagination and sorting
+    const students = await Student.find(query)
+      .sort({ [sort]: 1 }) // 1 for ascending, -1 for descending
+      .limit(limit * 1)
+      .skip((page - 1) * limit)
+      .select('name email prn rollNumber photo'); // Select only needed fields
+
+    res.status(200).json({
+      students,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

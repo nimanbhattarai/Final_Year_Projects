@@ -19,7 +19,7 @@ const AdminLogin = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', 'admin');
       setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
-      setTimeout(() => navigate('/admin'), 1500);
+      setTimeout(() => navigate('/admin/students'), 1500);
     } catch (error) {
       setSnackbar({ open: true, message: 'Invalid credentials', severity: 'error' });
     } finally {

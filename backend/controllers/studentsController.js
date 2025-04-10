@@ -2,6 +2,7 @@ const Student = require("../models/Student");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const crypto = require('crypto');
 const { uploadToCloudinary } = require('../utils/cloudinaryUpload');
 const { generateRandomPassword, sendPasswordEmail, retryEmailSending } = require("../utils/mailUtils");
 
@@ -15,7 +16,11 @@ const loginStudent = async (req, res) => {
       const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET, {
         expiresIn: "30d",
       });
-      res.status(200).json({ token, studentId: student._id });
+      res.status(200).json({ 
+        token, 
+        studentId: student._id,
+        hasPhoto: !!student.photo // Add this flag to indicate if photo exists
+      });
     } else {
       res.status(401).json({ message: "Invalid credentials" });
     }
@@ -438,6 +443,8 @@ const dataSaving = async (req, res) => {
       name: data.name,
       email: data.email,
       prn: data.prn,
+      rollNumber: data.rollNumber,
+      address: data.address,
       password: hashedPassword,
       performance: { academic: academicData }
     });
@@ -455,6 +462,150 @@ const dataSaving = async (req, res) => {
   }
 };
 
+// Forgot Password
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const student = await Student.findOne({ email });
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "No account found with this email",
+      });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = Date.now() + 3600000; // Token valid for 1 hour
+
+    // Update student with reset token using findOneAndUpdate
+    await Student.findOneAndUpdate(
+      { email },
+      {
+        resetPasswordToken: resetToken,
+        resetPasswordExpires: resetTokenExpiry
+      },
+      { new: true, runValidators: false }
+    );
+
+    // Create reset URL
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
+    // Setup email transporter
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Email content
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset Request',
+      html: `
+        <h1>You requested a password reset</h1>
+        <p>Click this link to reset your password:</p>
+        <a href="${resetUrl}">${resetUrl}</a>
+        <p>This link will expire in 1 hour.</p>
+        <p>If you didn't request this, please ignore this email.</p>
+      `,
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({
+      success: true,
+      message: "Password reset email sent",
+    });
+  } catch (error) {
+    console.error("Forgot password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to process password reset request",
+      error: error.message,
+    });
+  }
+};
+
+// Reset Password
+const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    // Find student with valid reset token
+    const student = await Student.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!student) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Update student password and clear reset token using findOneAndUpdate
+    await Student.findOneAndUpdate(
+      { _id: student._id },
+      {
+        password: hashedPassword,
+        resetPasswordToken: undefined,
+        resetPasswordExpires: undefined
+      },
+      { new: true, runValidators: false }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Password has been reset successfully",
+    });
+  } catch (error) {
+    console.error("Reset password error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to reset password",
+      error: error.message,
+    });
+  }
+};
+
+// Upload Profile Photo
+const uploadProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const { studentId } = req.body;
+    const student = await Student.findById(studentId);
+
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    const uploadResult = await uploadToCloudinary(req.file.buffer);
+    student.photo = uploadResult.secure_url;
+    await student.save();
+
+    res.status(200).json({
+      message: "Profile photo uploaded successfully",
+      photo: uploadResult.secure_url
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 module.exports = {
   loginStudent,
@@ -464,7 +615,10 @@ module.exports = {
   getAcademicRecords,
   uploadPhoto,
   testCloudinaryUpload,
-  dataSaving
+  dataSaving,
+  forgotPassword,
+  resetPassword,
+  uploadProfilePhoto
 };
 
 

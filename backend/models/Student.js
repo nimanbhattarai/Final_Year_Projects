@@ -5,9 +5,25 @@ const studentSchema = mongoose.Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    prn: {type: String, required: false},
-    address: { type: String, required: false},
+    prn: { 
+      type: String, 
+      required: function() {
+        // Only required during creation, not during updates
+        return this.isNew;
+      }, 
+      unique: true 
+    },
+    rollNumber: { 
+      type: String, 
+      required: function() {
+        // Only required during creation, not during updates
+        return this.isNew;
+      }
+    },
+    address: { type: String, required: false },
     photo: { type: String, default: "" },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
     socialMedia: {
       facebook: { type: String, default: "" },
       instagram: { type: String, default: "" },
@@ -16,7 +32,7 @@ const studentSchema = mongoose.Schema(
     },
     performance: {
       academic: {
-        type: Map, // Use Map for structured academic data
+        type: Map,
         of: new mongoose.Schema({
           semester: {
             type: Map,
@@ -50,5 +66,10 @@ const studentSchema = mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Create indexes
+studentSchema.index({ prn: 1 });
+studentSchema.index({ name: 1 });
+studentSchema.index({ email: 1 });
 
 module.exports = mongoose.model("Student", studentSchema);

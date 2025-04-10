@@ -202,7 +202,7 @@ const AcademicGrades = ({ selectedStudent }) => {
                   <div className="border-b border-gray-100">
                     <div className="bg-gradient-to-r from-indigo-50 to-purple-50 px-5 py-4">
                       <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold text-gray-900">Year {year}</h3>
+                        <h3 className="text-lg font-semibold text-gray-900">Year {(year).split("r")[1]}</h3>
                         <div className="flex space-x-1">
                           <button
                             onClick={() => handleDeleteYear(year)}
@@ -228,7 +228,7 @@ const AcademicGrades = ({ selectedStudent }) => {
                         {semesters.map(sem => (
                           <div key={sem} className="text-sm text-gray-600 flex items-center">
                             <div className="w-2 h-2 rounded-full bg-indigo-400 mr-2"></div>
-                            Semester {sem}
+                            Semester {(sem).split("r")[1]}
                           </div>
                         ))}
                       </div>
@@ -249,7 +249,7 @@ const AcademicGrades = ({ selectedStudent }) => {
           </div>
 
           {/* Add New Year Section */}
-          {availableYears.length > 0 && (
+          {!existingGrades && (
             <div className="mt-8 pt-5 border-t border-gray-200">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Academic Year</h3>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -261,7 +261,7 @@ const AcademicGrades = ({ selectedStudent }) => {
                     className="flex items-center justify-center p-4 bg-white border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-400 hover:bg-indigo-50 transition-all duration-200"
                   >
                     <Plus className="h-5 w-5 mr-2 text-indigo-500" />
-                    <span className="font-medium text-indigo-600">Year {year}</span>
+                    <span className="font-medium text-indigo-600">Year {(year)}</span>
                   </Link>
                 ))}
               </div>

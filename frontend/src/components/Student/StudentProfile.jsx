@@ -170,7 +170,7 @@ const StudentProfile = () => {
                 {academicPerformance.map((yearData) => (
                   <div key={yearData.year} className="border border-gray-200 rounded-lg overflow-hidden">
                     <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                      <h3 className="font-semibold text-gray-900">Year {yearData.year}</h3>
+                      <h3 className="font-semibold text-gray-900">Year {(yearData.year).split("r")[1]}</h3>
                     </div>
                     <div className="grid md:grid-cols-2 gap-4 p-4">
                       {yearData.semesters.map((semesterData) => (
@@ -179,7 +179,7 @@ const StudentProfile = () => {
                           className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow duration-200"
                         >
                           <h4 className="font-medium text-gray-900 mb-3 pb-2 border-b border-gray-100">
-                            Semester {semesterData.semester}
+                            Semester {(semesterData.semester).split("r")[1]}
                           </h4>
                           <div className="space-y-2">
                             {semesterData.subjects.length > 0 ? (

@@ -33,24 +33,13 @@ export const adminApi = {
   getStudents: () => api.get('/admin/students'),
   
   // Update to accept photo upload
-  registerStudent: (data) => {
-    // If data contains a photo file, use FormData
-    if (data.photo instanceof File) {
-      const formData = new FormData();
-      formData.append('name', data.name);
-      formData.append('email', data.email);
-      formData.append('password', data.password);
-      formData.append('photo', data.photo);
-      
-      return api.post('/student/register', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
-    }
-    
-    // Otherwise, use regular JSON
-    return api.post('/student/register', data);
+  registerStudent: (formData) => {
+    // Use the correct endpoint and send the FormData directly
+    return api.post('/admin/student/register', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
   },
   
   deleteStudent: (studentId) => api.delete(`/admin/student/${studentId}`),
@@ -84,6 +73,8 @@ export const studentApi = {
   login: (credentials) => api.post('/student/login', credentials),
   getProfile: (id) => api.get(`/student/${id}/profile`),
   getAnalysis: (id) => api.get(`/student/${id}/analysis`),
+  forgotPassword: (email) => api.post('/student/forgot-password', { email }),
+  resetPassword: (token, newPassword) => api.post(`/student/reset-password/${token}`, { password: newPassword }),
   uploadPhoto: (id, photoFile) => {
     const formData = new FormData();
     formData.append('photo', photoFile);
