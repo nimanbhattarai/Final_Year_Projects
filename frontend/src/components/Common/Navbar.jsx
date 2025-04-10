@@ -32,17 +32,30 @@ const Navbar = () => {
   const renderNavLinks = () => {
     // Common links for all users
     const commonLinks = (
-      <Link
-        to="/"
-        className={`flex items-center space-x-2 py-1 px-3 rounded-md transition-all duration-200 ${
-          isActive('/')
-            ? isScrolled ? 'bg-indigo-100 text-indigo-700' : 'bg-indigo-500 text-white'
-            : isScrolled ? 'hover:bg-gray-100' : 'hover:bg-indigo-500'
-        }`}
-      >
-        <Home className="h-4 w-4" />
-        <span className="font-medium">Home</span>
-      </Link>
+      <>
+        <Link
+          to="/"
+          className={`flex items-center space-x-2 py-1 px-3 rounded-md transition-all duration-200 ${
+            isActive('/')
+              ? isScrolled ? 'bg-indigo-100 text-indigo-700' : 'bg-indigo-500 text-white'
+              : isScrolled ? 'hover:bg-gray-100' : 'hover:bg-indigo-500'
+          }`}
+        >
+          <Home className="h-4 w-4" />
+          <span className="font-medium">Home</span>
+        </Link>
+        <Link
+          to="/best-performing"
+          className={`flex items-center space-x-2 py-1 px-3 rounded-md transition-all duration-200 ${
+            isActive('/best-performing')
+              ? isScrolled ? 'bg-indigo-100 text-indigo-700' : 'bg-indigo-500 text-white'
+              : isScrolled ? 'hover:bg-gray-100' : 'hover:bg-indigo-500'
+          }`}
+        >
+          <Award className="h-4 w-4" />
+          <span className="font-medium">Best Performing</span>
+        </Link>
+      </>
     );
 
     if (!token) {
@@ -78,17 +91,6 @@ const Navbar = () => {
       return (
         <>
           {commonLinks}
-          <Link
-            to="/best-performing"
-            className={`flex items-center space-x-2 py-1 px-3 rounded-md transition-all duration-200 ${
-              isActive('/best-performing')
-                ? isScrolled ? 'bg-indigo-100 text-indigo-700' : 'bg-indigo-500 text-white'
-                : isScrolled ? 'hover:bg-gray-100' : 'hover:bg-indigo-500'
-            }`}
-          >
-            <Award className="h-4 w-4" />
-            <span className="font-medium">Best Performing</span>
-          </Link>
           <Link
             to="/admin"
             className={`flex items-center space-x-2 py-1 px-3 rounded-md transition-all duration-200 ${
