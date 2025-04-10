@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
-import { Search, UserPlus, Trash2, User } from 'lucide-react';
+import { Search, UserPlus, Trash2, User, Linkedin, Github, Instagram, Facebook } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PhotoUploader from './PhotoUploader';
 import { useNavigate } from 'react-router-dom';
@@ -170,14 +170,38 @@ const StudentDetails = ({ onSelectStudent }) => {
 
   const handleSaveSocialMedia = async () => {
     try {
+      // Clean up social media data by removing empty strings
+      const cleanedSocialMedia = {
+        facebook: socialMedia.facebook?.trim() || '',
+        instagram: socialMedia.instagram?.trim() || '',
+        linkedin: socialMedia.linkedin?.trim() || '',
+        github: socialMedia.github?.trim() || ''
+      };
+
       await adminApi.updateStudentData({
         studentId: showEditSocial._id,
-        data: { socialMedia }
+        data: { socialMedia: cleanedSocialMedia }
       });
+
+      // Update the student in the local state
+      setStudents(prevStudents => 
+        prevStudents.map(student => 
+          student._id === showEditSocial._id 
+            ? { ...student, socialMedia: cleanedSocialMedia }
+            : student
+        )
+      );
+
       toast.success('Social media profiles updated');
-      fetchStudents();
       setShowEditSocial(null);
+      
+      // If this is the selected student, update the selection
+      if (selectedStudentId === showEditSocial._id) {
+        const updatedStudent = { ...showEditSocial, socialMedia: cleanedSocialMedia };
+        onSelectStudent(updatedStudent);
+      }
     } catch (error) {
+      console.error('Error updating social media:', error);
       toast.error('Failed to update social media profiles');
     }
   };
@@ -546,66 +570,87 @@ const StudentDetails = ({ onSelectStudent }) => {
         </div>
       )}
 
-      {/* Social Media Modal */}
+      {/* Social Media Edit Modal */}
       {showEditSocial && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
             <h3 className="text-xl font-bold mb-4">Edit Social Media Profiles</h3>
-            <p className="text-sm text-gray-500 mb-4">For student: {showEditSocial.name}</p>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Facebook</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="flex items-center">
+                    <Linkedin className="h-5 w-5 text-blue-600 mr-2" />
+                    LinkedIn Profile
+                  </span>
+                </label>
                 <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="https://facebook.com/username"
-                  value={socialMedia.facebook}
-                  onChange={(e) => setSocialMedia({ ...socialMedia, facebook: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">Instagram</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="https://instagram.com/username"
-                  value={socialMedia.instagram}
-                  onChange={(e) => setSocialMedia({ ...socialMedia, instagram: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">LinkedIn</label>
-                <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="https://linkedin.com/in/username"
+                  type="url"
                   value={socialMedia.linkedin}
                   onChange={(e) => setSocialMedia({ ...socialMedia, linkedin: e.target.value })}
+                  placeholder="https://linkedin.com/in/your-profile"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700">GitHub</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="flex items-center">
+                    <Github className="h-5 w-5 text-gray-800 mr-2" />
+                    GitHub Profile
+                  </span>
+                </label>
                 <input
-                  type="text"
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  placeholder="https://github.com/username"
+                  type="url"
                   value={socialMedia.github}
                   onChange={(e) => setSocialMedia({ ...socialMedia, github: e.target.value })}
+                  placeholder="https://github.com/your-username"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="flex items-center">
+                    <Instagram className="h-5 w-5 text-pink-600 mr-2" />
+                    Instagram Profile
+                  </span>
+                </label>
+                <input
+                  type="url"
+                  value={socialMedia.instagram}
+                  onChange={(e) => setSocialMedia({ ...socialMedia, instagram: e.target.value })}
+                  placeholder="https://instagram.com/your-username"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <span className="flex items-center">
+                    <Facebook className="h-5 w-5 text-blue-600 mr-2" />
+                    Facebook Profile
+                  </span>
+                </label>
+                <input
+                  type="url"
+                  value={socialMedia.facebook}
+                  onChange={(e) => setSocialMedia({ ...socialMedia, facebook: e.target.value })}
+                  placeholder="https://facebook.com/your-profile"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 />
               </div>
             </div>
-            <div className="flex justify-end space-x-3 mt-6">
+
+            <div className="mt-6 flex justify-end space-x-3">
               <button
-                type="button"
                 onClick={() => setShowEditSocial(null)}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
-                type="button"
                 onClick={handleSaveSocialMedia}
-                className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
               >
                 Save Changes
               </button>

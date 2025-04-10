@@ -431,6 +431,9 @@ const dataSaving = async (req, res) => {
 
     if (existingStudent) {
       existingStudent.performance.academic = academicData;
+      if (data.socialMedia) {
+        existingStudent.socialMedia = data.socialMedia;
+      }
       await existingStudent.save();
 
       return res.status(200).json({ message: "Data updated successfully" });
@@ -446,6 +449,12 @@ const dataSaving = async (req, res) => {
       rollNumber: data.rollNumber,
       address: data.address,
       password: hashedPassword,
+      socialMedia: data.socialMedia || {
+        facebook: '',
+        instagram: '',
+        linkedin: '',
+        github: ''
+      },
       performance: { academic: academicData }
     });
 

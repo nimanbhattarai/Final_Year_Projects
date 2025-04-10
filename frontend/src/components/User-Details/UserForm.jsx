@@ -82,6 +82,12 @@ const UserForm = () => {
     prn: '',
     rollNumber: '',
     address: '',
+    socialMedia: {
+      facebook: '',
+      instagram: '',
+      github: '',
+      linkedin: ''
+    },
     academic: Object.fromEntries(
       Object.entries(subjectsBySemester).map(([sem, subjects]) => [
         sem,
@@ -109,6 +115,16 @@ const UserForm = () => {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleSocialMediaChange = (platform, value) => {
+    setFormData({
+      ...formData,
+      socialMedia: {
+        ...formData.socialMedia,
+        [platform]: value
+      }
+    });
+  };
+
   const nextStep = () => {
     // Validate basic info before proceeding
     if (currentStep === 1) {
@@ -124,6 +140,17 @@ const UserForm = () => {
         toast.error('Please enter a valid email address');
         return;
       }
+
+      // Validate social media URLs if provided
+      const urlRegex = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+      const socialMediaUrls = Object.entries(formData.socialMedia);
+      
+      for (const [platform, url] of socialMediaUrls) {
+        if (url && !urlRegex.test(url.trim())) {
+          toast.error(`Please enter a valid URL for ${platform} profile`);
+          return;
+        }
+      }
     }
     
     setCurrentStep(prev => Math.min(prev + 1, totalSteps));
@@ -135,7 +162,7 @@ const UserForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+  
     // Validate form before submission
     if (!formData.name || !formData.email || !formData.prn || !formData.rollNumber || !formData.address) {
       toast.error('Please fill all required fields in the Personal Information section');
@@ -210,13 +237,19 @@ const UserForm = () => {
         }
       });
     });
-
+  
     const payload = {
       name: formData.name,
       email: formData.email,
       prn: formData.prn,
       rollNumber: formData.rollNumber,
       address: formData.address,
+      socialMedia: {
+        facebook: formData.socialMedia.facebook.trim(),
+        instagram: formData.socialMedia.instagram.trim(),
+        github: formData.socialMedia.github.trim(),
+        linkedin: formData.socialMedia.linkedin.trim()
+      },
       ...subjectData
     };
   
@@ -249,59 +282,127 @@ const UserForm = () => {
           type="text" 
           name="name" 
           value={formData.name}
-          placeholder="Enter your full name"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
       </div>
+
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
         <input 
           type="email" 
           name="email" 
           value={formData.email}
-          placeholder="your.email@bvucoep.edu.in"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
       </div>
+
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">PRN (Permanent Registration Number)</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">PRN</label>
         <input 
           type="text" 
           name="prn" 
           value={formData.prn}
-          placeholder="Enter your PRN"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
       </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
         <input 
           type="text" 
           name="rollNumber" 
           value={formData.rollNumber}
-          placeholder="Enter your roll number"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
       </div>
+
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
         <textarea 
           name="address" 
           value={formData.address}
-          placeholder="Enter your complete address"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          rows="3" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          rows={3}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
+      </div>
+
+      <div className="border-t border-gray-200 pt-6">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Social Media Profiles</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              <span className="flex items-center">
+                <span>LinkedIn Profile</span>
+                <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+              </span>
+            </label>
+            <input 
+              type="url" 
+              value={formData.socialMedia.linkedin}
+              onChange={(e) => handleSocialMediaChange('linkedin', e.target.value)}
+              placeholder="https://linkedin.com/in/your-profile"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              <span className="flex items-center">
+                <span>GitHub Profile</span>
+                <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+              </span>
+            </label>
+            <input 
+              type="url" 
+              value={formData.socialMedia.github}
+              onChange={(e) => handleSocialMediaChange('github', e.target.value)}
+              placeholder="https://github.com/your-username"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              <span className="flex items-center">
+                <span>Instagram Profile</span>
+                <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+              </span>
+            </label>
+            <input 
+              type="url" 
+              value={formData.socialMedia.instagram}
+              onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+              placeholder="https://instagram.com/your-username"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              <span className="flex items-center">
+                <span>Facebook Profile</span>
+                <span className="text-xs text-gray-500 ml-2">(Optional)</span>
+              </span>
+            </label>
+            <input 
+              type="url" 
+              value={formData.socialMedia.facebook}
+              onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+              placeholder="https://facebook.com/your-profile"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -312,19 +413,19 @@ const UserForm = () => {
         {formData.academic[semester].map((subj, index) => (
           <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
             <label className="block text-sm font-medium text-gray-700 mb-2">{subj.subject}</label>
-            <input
-              type="number"
-              value={subj.marks}
+              <input
+                type="number"
+                value={subj.marks}
               onChange={(e) => handleSubjectChange(semester, index, e.target.value)}
               className="block w-full px-4 py-2.5 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-gray-900"
-              required
+                required
               min="0"
               max="100"
               placeholder="Enter marks (0-100)"
-            />
-          </div>
-        ))}
-      </div>
+              />
+            </div>
+          ))}
+        </div>
     </div>
   );
 

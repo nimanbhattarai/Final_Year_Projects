@@ -47,95 +47,70 @@ const StudentInfo = ({ selectedStudent }) => {
 
         {/* Social Media Links */}
         <div className="p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
-            <Globe className="h-5 w-5 mr-2 text-indigo-600" />
-            Social Media Profiles
-          </h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Social Media Profiles</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {selectedStudent.socialMedia?.linkedin && selectedStudent.socialMedia.linkedin.trim() !== '' && (
+              <a
+                href={selectedStudent.socialMedia.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Linkedin className="h-5 w-5 text-blue-600" />
+                <span className="text-gray-700">LinkedIn Profile</span>
+                <ExternalLink className="h-4 w-4 text-gray-400 ml-auto" />
+              </a>
+            )}
+            
+            {selectedStudent.socialMedia?.github && selectedStudent.socialMedia.github.trim() !== '' && (
+              <a
+                href={selectedStudent.socialMedia.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Github className="h-5 w-5 text-gray-800" />
+                <span className="text-gray-700">GitHub Profile</span>
+                <ExternalLink className="h-4 w-4 text-gray-400 ml-auto" />
+              </a>
+            )}
+            
+            {selectedStudent.socialMedia?.instagram && selectedStudent.socialMedia.instagram.trim() !== '' && (
+              <a
+                href={selectedStudent.socialMedia.instagram}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Instagram className="h-5 w-5 text-pink-600" />
+                <span className="text-gray-700">Instagram Profile</span>
+                <ExternalLink className="h-4 w-4 text-gray-400 ml-auto" />
+              </a>
+            )}
+            
+            {selectedStudent.socialMedia?.facebook && selectedStudent.socialMedia.facebook.trim() !== '' && (
+              <a
+                href={selectedStudent.socialMedia.facebook}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+              >
+                <Facebook className="h-5 w-5 text-blue-600" />
+                <span className="text-gray-700">Facebook Profile</span>
+                <ExternalLink className="h-4 w-4 text-gray-400 ml-auto" />
+              </a>
+            )}
 
-          {selectedStudent.socialMedia && 
-           Object.values(selectedStudent.socialMedia).some(link => link) ? (
-            <div className="grid md:grid-cols-2 gap-4">
-              {selectedStudent.socialMedia.facebook && (
-                <a
-                  href={selectedStudent.socialMedia.facebook}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors group"
-                >
-                  <div className="p-2 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-                    <Facebook className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900">Facebook</h4>
-                    <p className="text-xs text-gray-500 truncate">{selectedStudent.socialMedia.facebook}</p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
-                </a>
-              )}
-
-              {selectedStudent.socialMedia.instagram && (
-                <a
-                  href={selectedStudent.socialMedia.instagram}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-pink-50 hover:border-pink-200 transition-colors group"
-                >
-                  <div className="p-2 bg-pink-100 rounded-full group-hover:bg-pink-200 transition-colors">
-                    <Instagram className="h-6 w-6 text-pink-600" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900">Instagram</h4>
-                    <p className="text-xs text-gray-500 truncate">{selectedStudent.socialMedia.instagram}</p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
-                </a>
-              )}
-
-              {selectedStudent.socialMedia.linkedin && (
-                <a
-                  href={selectedStudent.socialMedia.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-200 transition-colors group"
-                >
-                  <div className="p-2 bg-blue-100 rounded-full group-hover:bg-blue-200 transition-colors">
-                    <Linkedin className="h-6 w-6 text-blue-700" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900">LinkedIn</h4>
-                    <p className="text-xs text-gray-500 truncate">{selectedStudent.socialMedia.linkedin}</p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
-                </a>
-              )}
-
-              {selectedStudent.socialMedia.github && (
-                <a
-                  href={selectedStudent.socialMedia.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center space-x-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors group"
-                >
-                  <div className="p-2 bg-gray-100 rounded-full group-hover:bg-gray-200 transition-colors">
-                    <Github className="h-6 w-6 text-gray-800" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-sm font-medium text-gray-900">GitHub</h4>
-                    <p className="text-xs text-gray-500 truncate">{selectedStudent.socialMedia.github}</p>
-                  </div>
-                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-gray-600" />
-                </a>
-              )}
-            </div>
-          ) : (
-            <div className="text-center py-8 bg-gray-50 rounded-lg border border-dashed border-gray-300">
-              <Globe className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-gray-600">No social media profiles available.</p>
-              <p className="text-sm text-gray-500 mt-1">
-                Social media profiles can be added from the Student Details section.
-              </p>
-            </div>
-          )}
+            {(!selectedStudent.socialMedia ||
+              (!selectedStudent.socialMedia.linkedin?.trim() && 
+               !selectedStudent.socialMedia.github?.trim() && 
+               !selectedStudent.socialMedia.instagram?.trim() && 
+               !selectedStudent.socialMedia.facebook?.trim())) && (
+              <div className="col-span-2 text-center py-4 text-gray-500">
+                No social media profiles added
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
