@@ -73,6 +73,8 @@ export const studentApi = {
   login: (credentials) => api.post('/student/login', credentials),
   getProfile: (id) => api.get(`/student/${id}/profile`),
   getAnalysis: (id) => api.get(`/student/${id}/analysis`),
+  forgotPassword: (email) => api.post('/student/forgot-password', { email }),
+  resetPassword: (token, newPassword) => api.post(`/student/reset-password/${token}`, { password: newPassword }),
   uploadPhoto: (id, photoFile) => {
     const formData = new FormData();
     formData.append('photo', photoFile);
