@@ -59,16 +59,28 @@ const subjectsBySemester = {
     'Project Planning & Management',
     'Web Services (ITC-V)',
     'Business Intelligence',
-    'Information Retrieval (Elective I)',
     'IT Lab V',
-    'Internship'
+    'Internship',
+    {
+      type: 'elective',
+      subjects: [
+        'Information Retrieval (Elective I)',
+        'UI/UX (Elective I)'
+      ]
+    }
   ],
   8: [
     'Information Security',
-    'Cyber Security (Elective II)',
     'Internet of Things',
     'Data Engineering',
-    'IT Lab VI'
+    'IT Lab VI',
+    {
+      type: 'elective',
+      subjects: [
+        'Management Information System (Elective II)',
+        'Cyber Security (Elective II)'
+      ]
+    }
   ]
 };
 
@@ -76,6 +88,10 @@ const UserForm = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedElectives, setSelectedElectives] = useState({
+    7: null,
+    8: null
+  });
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -91,7 +107,12 @@ const UserForm = () => {
     academic: Object.fromEntries(
       Object.entries(subjectsBySemester).map(([sem, subjects]) => [
         sem,
-        subjects.map((subject) => ({ subject, marks: '' }))
+        subjects.map((subject) => {
+          if (typeof subject === 'object' && subject.type === 'elective') {
+            return { subject: null, marks: '', isElective: true };
+          }
+          return { subject, marks: '' };
+        })
       ])
     )
   });
@@ -99,15 +120,48 @@ const UserForm = () => {
   const totalSteps = Object.keys(subjectsBySemester).length + 1; // Basic info + semesters
 
   const handleSubjectChange = (semester, index, value) => {
+    // Only update if the value is a valid number or empty string
+    if (value === '' || (!isNaN(value) && value >= 0 && value <= 100)) {
+      const updatedSemester = [...formData.academic[semester]];
+      updatedSemester[index] = {
+        ...updatedSemester[index],
+        marks: value
+      };
+      
+      setFormData(prev => ({
+        ...prev,
+        academic: {
+          ...prev.academic,
+          [semester]: updatedSemester
+        }
+      }));
+    }
+  };
+
+  const handleElectiveChange = (semester, index, value) => {
     const updatedSemester = [...formData.academic[semester]];
-    updatedSemester[index].marks = value;
-    setFormData({
-      ...formData,
-      academic: {
-        ...formData.academic,
-        [semester]: updatedSemester
-      }
-    });
+    const electiveIndex = updatedSemester.findIndex(subj => subj.isElective);
+    
+    if (electiveIndex !== -1) {
+      updatedSemester[electiveIndex] = {
+        ...updatedSemester[electiveIndex],
+        subject: value,
+        marks: updatedSemester[electiveIndex].marks // Preserve existing marks
+      };
+      
+      setSelectedElectives(prev => ({
+        ...prev,
+        [semester]: value
+      }));
+      
+      setFormData(prev => ({
+        ...prev,
+        academic: {
+          ...prev.academic,
+          [semester]: updatedSemester
+        }
+      }));
+    }
   };
 
   const handleBasicChange = (e) => {
@@ -410,22 +464,75 @@ const UserForm = () => {
   const renderSemester = (semester) => (
     <div className="space-y-6">
       <div className="grid gap-6">
-        {formData.academic[semester].map((subj, index) => (
-          <div key={index} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <label className="block text-sm font-medium text-gray-700 mb-2">{subj.subject}</label>
+        {formData.academic[semester].map((subj, index) => {
+          if (subj.isElective) {
+            const electiveGroup = subjectsBySemester[semester].find(s => typeof s === 'object' && s.type === 'elective');
+            return (
+              <div key={`elective-${semester}-${index}`} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Elective Subject</label>
+                <select
+                  value={subj.subject || ''}
+                  onChange={(e) => handleElectiveChange(semester, index, e.target.value)}
+                  className="block w-full px-4 py-2.5 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-gray-900"
+                  required
+                >
+                  <option value="">Select an elective</option>
+                  {electiveGroup.subjects.map((elective) => (
+                    <option 
+                      key={elective} 
+                      value={elective}
+                      disabled={selectedElectives[semester] && selectedElectives[semester] !== elective}
+                    >
+                      {elective}
+                    </option>
+                  ))}
+                </select>
+                {subj.subject && (
+                  <input
+                    type="number"
+                    value={subj.marks}
+                    onChange={(e) => handleSubjectChange(semester, index, e.target.value)}
+                    onWheel={(e) => e.target.blur()} // Prevent scroll from changing value
+                    onKeyDown={(e) => {
+                      // Prevent arrow keys from changing value
+                      if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                    className="mt-2 block w-full px-4 py-2.5 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-gray-900"
+                    required
+                    min="0"
+                    max="100"
+                    placeholder="Enter marks (0-100)"
+                  />
+                )}
+              </div>
+            );
+          }
+          return (
+            <div key={`subject-${semester}-${index}`} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <label className="block text-sm font-medium text-gray-700 mb-2">{subj.subject}</label>
               <input
                 type="number"
                 value={subj.marks}
-              onChange={(e) => handleSubjectChange(semester, index, e.target.value)}
-              className="block w-full px-4 py-2.5 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-gray-900"
+                onChange={(e) => handleSubjectChange(semester, index, e.target.value)}
+                onWheel={(e) => e.target.blur()} // Prevent scroll from changing value
+                onKeyDown={(e) => {
+                  // Prevent arrow keys from changing value
+                  if (['ArrowUp', 'ArrowDown'].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
+                className="block w-full px-4 py-2.5 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-white text-gray-900"
                 required
-              min="0"
-              max="100"
-              placeholder="Enter marks (0-100)"
+                min="0"
+                max="100"
+                placeholder="Enter marks (0-100)"
               />
             </div>
-          ))}
-        </div>
+          );
+        })}
+      </div>
     </div>
   );
 
