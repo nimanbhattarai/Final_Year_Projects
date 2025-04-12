@@ -23,7 +23,7 @@ const PerformanceView = ({ selectedStudent }) => {
     try {
       setRefreshing(true);
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:5000/api/performance/${selectedStudent._id}`, {
+      const response = await axios.get(`http://https://final-year-projects-backend.onrender.com/api/performance/${selectedStudent._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPerformanceData(response.data.data);

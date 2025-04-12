@@ -26,7 +26,7 @@ const TeacherLogin = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/teacher/login', formData);
+      const response = await axios.post('http://https://final-year-projects-backend.onrender.com/api/teacher/login', formData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', 'teacher');
       setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
