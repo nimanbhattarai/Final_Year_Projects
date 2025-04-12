@@ -32,7 +32,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}`, {
+      const response = await axios.get(`https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setExistingRemarks(response.data.teacherRemarks || []);
@@ -56,7 +56,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `http://https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}`,
+        `https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}`,
         {
           teacherName: formData.teacherName,
           remark: formData.remark,
@@ -94,7 +94,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`http://https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}/${index}`, {
+      await axios.delete(`https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}/${index}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

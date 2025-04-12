@@ -16,7 +16,7 @@ const StudentList = ({ onSelectStudent }) => {
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://https://final-year-projects-backend.onrender.com/api/student/all', {
+      const response = await axios.get('https://final-year-projects-backend.onrender.com/api/student/all', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStudents(response.data.data || []);
