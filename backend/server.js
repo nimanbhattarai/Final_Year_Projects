@@ -27,5 +27,9 @@ app.use("/api/performance", performanceRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/teacher", teacherRoutes);
 
+app.get("/api/health", (req, res) => {
+  res.status(200).json({ message: "Server is running" });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
