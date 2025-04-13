@@ -30,7 +30,7 @@ const TeacherLogin = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('role', 'teacher');
       setSnackbar({ open: true, message: 'Login successful!', severity: 'success' });
-      setTimeout(() => navigate('/teacher'), 500);
+      setTimeout(() => navigate('/teacher/students'), 500);
     } catch (error) {
       console.error('Login error:', error);
       setSnackbar({ open: true, message: 'Invalid credentials', severity: 'error' });

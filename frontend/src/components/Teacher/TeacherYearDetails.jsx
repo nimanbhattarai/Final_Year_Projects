@@ -195,7 +195,7 @@ const TeacherYearDetails = () => {
             <span>Back</span>
           </button>
           <h1 className="text-2xl font-bold text-gray-900">
-            Year {year} Academic Records
+            Year {(year).split("r")[1]} Academic Records
           </h1>
         </div>
         
@@ -224,7 +224,7 @@ const TeacherYearDetails = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h2 className="text-lg font-semibold text-gray-900">Academic Performance</h2>
-            <p className="text-sm text-gray-500 mt-1">Year {year} semester breakdown</p>
+            <p className="text-sm text-gray-500 mt-1">Year {(year).split("r")[1]} semester breakdown</p>
           </div>
           <div className="bg-indigo-50 p-2 rounded-lg">
             <BookOpen className="h-5 w-5 text-indigo-600" />
@@ -255,7 +255,7 @@ const TeacherYearDetails = () => {
                       : 'text-gray-600 hover:text-indigo-600 hover:bg-gray-100'
                   }`}
                 >
-                  Semester {sem}
+                  Semester {(sem).split("r")[1]}
                 </button>
               ))}
             </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Routes, Link, useNavigate, useLocation } from 'react-router-dom';
-import { GraduationCap, Award, UserCircle, BookOpen, ArrowLeft, ChevronRight, User, LogOut, BarChart2, TrendingUp, Facebook, Instagram, Linkedin, Github } from 'lucide-react';
+import { GraduationCap, Award, UserCircle, BookOpen, ArrowLeft, ChevronRight, User, LogOut, BarChart2, TrendingUp, Facebook, Instagram, Linkedin, Github, Info } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import StudentList from './StudentList';
@@ -11,6 +11,7 @@ import ExtraCurricular from '../Admin/ExtraCurricular';
 import YearDetails from '../Admin/YearDetails';
 import PerformanceCharts from '../Student/PerformanceCharts';
 import TeacherYearDetails from './TeacherYearDetails';
+import StudentInfo from './StudentInfo';
 
 const TeacherDashboard = () => {
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -88,6 +89,19 @@ const TeacherDashboard = () => {
               <UserCircle className={`w-5 h-5 mr-3 ${isActiveLink('students') ? 'text-indigo-600' : 'text-gray-500'}`} />
               Student List
               {isActiveLink('students') && <ChevronRight className="w-4 h-4 ml-auto" />}
+            </Link>
+            
+            <Link
+              to="info"
+              className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                isActiveLink('info') 
+                  ? 'bg-indigo-50 text-indigo-700 border-l-4 border-indigo-600 pl-3' 
+                  : 'text-gray-700 hover:bg-gray-50 hover:text-indigo-600'
+              }`}
+            >
+              <Info className={`w-5 h-5 mr-3 ${isActiveLink('info') ? 'text-indigo-600' : 'text-gray-500'}`} />
+              Student Info
+              {isActiveLink('info') && <ChevronRight className="w-4 h-4 ml-auto" />}
             </Link>
             
             <Link
@@ -250,6 +264,7 @@ const TeacherDashboard = () => {
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <Routes>
               <Route path="students" element={<StudentList onSelectStudent={setSelectedStudent} />} />
+              <Route path="info" element={<StudentInfo selectedStudent={selectedStudent} />} />
               <Route path="performance-charts" element={
                 selectedStudent ? (
                   <PerformanceCharts studentId={selectedStudent._id} />

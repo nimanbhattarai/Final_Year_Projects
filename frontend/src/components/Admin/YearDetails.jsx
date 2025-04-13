@@ -308,7 +308,7 @@ const YearDetails = () => {
             {student?.name?.charAt(0) || 'S'}
           </div>
           <h2 className="text-lg font-bold text-gray-900">
-            {student?.name} - Year {year}
+            {student?.name} - Year {(year).split("r")[1]}
           </h2>
         </div>
       </div>
@@ -336,7 +336,7 @@ const YearDetails = () => {
               {Object.entries(semesters).map(([semesterKey, subjects]) => (
                 <div key={semesterKey} className="border border-gray-200 rounded-lg overflow-hidden">
                   <div className="bg-gray-50 flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                    <h3 className="font-semibold text-gray-900">Semester {semesterKey}</h3>
+                    <h3 className="font-semibold text-gray-900">Semester {semesterKey.split("r")[1]}</h3>
                     <button
                       onClick={() => handleDeleteSemester(semesterKey)}
                       className="text-gray-500 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition-colors"
@@ -374,7 +374,7 @@ const YearDetails = () => {
         </div>
 
         {/* Add New Semester Form - Only show if there are available semesters */}
-        {availableSemesters.length > 0 && (
+        {/* {availableSemesters.length > 0 && (
           <div className="border-t border-gray-200 pt-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Semester</h3>
@@ -389,7 +389,7 @@ const YearDetails = () => {
                   <option value="">-- Select Semester --</option>
                   {availableSemesters.map((semNumber) => (
                     <option key={semNumber} value={semNumber}>
-                      Semester {semNumber}
+                      Semester {semNumber.split("r")[1]}
                     </option>
                   ))}
                 </select>
@@ -477,7 +477,7 @@ const YearDetails = () => {
               )}
             </form>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
