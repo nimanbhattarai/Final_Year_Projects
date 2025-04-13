@@ -3,6 +3,7 @@ import { adminApi } from '../../services/api';
 import { Snackbar, Alert } from '@mui/material';
 import { Trash2, MessageCircle, Plus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { FaTrash } from 'react-icons/fa';
 
 const TeacherRemarks = ({ selectedStudent }) => {
   const [formData, setFormData] = useState({
@@ -58,6 +59,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
         studentId: selectedStudent._id,
         remark: formData.remark,
         grade: Number(formData.grade),
+        teacherName: 'Admin',
       });
 
       toast.success('Teacher remark added successfully');
@@ -68,6 +70,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
         {
           remark: formData.remark,
           grade: Number(formData.grade),
+          teacherName: 'Admin', // Set default for admin-added remarks
         },
       ]);
 
@@ -160,29 +163,25 @@ const TeacherRemarks = ({ selectedStudent }) => {
                   Existing Remarks
                 </h3>
                 <div className="space-y-4">
-                  {existingRemarks.map((remark, index) => (
-                    <div 
-                      key={index} 
-                      className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200"
-                    >
-                      <div className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex items-center space-x-3">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
-                              Grade: {remark.grade}
-                            </span>
-                          </div>
-                          <button
-                            onClick={() => handleDeleteRemark(index)}
-                            className="text-gray-400 hover:text-red-600 p-1.5 rounded-full hover:bg-red-50 transition-colors duration-200"
-                            title="Delete Remark"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                  {existingRemarks.map((remarkObj, index) => (
+                    <div key={index} className="mb-4 p-3 border rounded relative">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium mb-1">{remarkObj.remark}</p>
+                          <p className="text-sm text-gray-600">
+                            Grade: <span className="font-semibold">{remarkObj.grade}</span>
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            By: <span className="font-semibold">{remarkObj.teacherName || 'Unknown'}</span>
+                          </p>
                         </div>
-                        <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
-                          {remark.remark}
-                        </p>
+                        <button
+                          onClick={() => handleDeleteRemark(index)}
+                          className="text-red-500 hover:text-red-700"
+                          disabled={submitting}
+                        >
+                          <FaTrash />
+                        </button>
                       </div>
                     </div>
                   ))}

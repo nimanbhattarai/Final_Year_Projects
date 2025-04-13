@@ -12,6 +12,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
   const [existingRemarks, setExistingRemarks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [teacherInfo, setTeacherInfo] = useState(null);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -24,6 +25,23 @@ const TeacherRemarks = ({ selectedStudent }) => {
       fetchExistingRemarks();
     }
   }, [selectedStudent]);
+
+  useEffect(() => {
+    // Fetch teacher info when component mounts
+    const fetchTeacherProfile = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get('https://final-year-projects-backend.onrender.com/api/teacher/profile', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setTeacherInfo(response.data.data);
+      } catch (error) {
+        console.error('Error fetching teacher info:', error);
+      }
+    };
+
+    fetchTeacherProfile();
+  }, []);
 
   const fetchExistingRemarks = async () => {
     if (!selectedStudent || !selectedStudent._id) return;
@@ -57,6 +75,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
       await axios.post(
         `https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}`,
         {
+          teacherName: teacherInfo?.name || 'Teacher',
           remark: formData.remark,
           grade: Number(formData.grade),
         },
@@ -69,8 +88,10 @@ const TeacherRemarks = ({ selectedStudent }) => {
       setExistingRemarks([
         ...existingRemarks,
         {
+          teacherName: teacherInfo?.name || 'Teacher',
           remark: formData.remark,
           grade: Number(formData.grade),
+          date: new Date()
         },
       ]);
 
