@@ -23,6 +23,7 @@ const StudentDetails = ({ onSelectStudent }) => {
     password: '',
     rollNumber: '',
     prn: '',
+    address: '',
     socialMedia: {
       facebook: '',
       instagram: '',
@@ -47,9 +48,33 @@ const StudentDetails = ({ onSelectStudent }) => {
       setLoading(true);
       const response = await adminApi.getStudents();
       if (response.data && Array.isArray(response.data)) {
-        setStudents(response.data);
+        // Get full details for each student including socialMedia
+        const studentsWithFullDetails = await Promise.all(
+          response.data.map(async (student) => {
+            try {
+              const detailsResponse = await adminApi.getStudent(student._id);
+              return detailsResponse.data || student;
+            } catch (error) {
+              console.error(`Error fetching details for student ${student._id}:`, error);
+              return student;
+            }
+          })
+        );
+        setStudents(studentsWithFullDetails);
       } else if (response.data.students && Array.isArray(response.data.students)) {
-        setStudents(response.data.students);
+        // Same for paginated response
+        const studentsWithFullDetails = await Promise.all(
+          response.data.students.map(async (student) => {
+            try {
+              const detailsResponse = await adminApi.getStudent(student._id);
+              return detailsResponse.data || student;
+            } catch (error) {
+              console.error(`Error fetching details for student ${student._id}:`, error);
+              return student;
+            }
+          })
+        );
+        setStudents(studentsWithFullDetails);
       } else {
         console.error('Unexpected response format:', response.data);
         toast.error('Failed to load students: Invalid data format');
@@ -98,6 +123,8 @@ const StudentDetails = ({ onSelectStudent }) => {
       formData.append('password', newStudent.password);
       formData.append('rollNumber', newStudent.rollNumber);
       formData.append('prn', newStudent.prn);
+      formData.append('address', newStudent.address);
+    
       
       // Only append photo if it exists
       if (photo) {
@@ -117,6 +144,7 @@ const StudentDetails = ({ onSelectStudent }) => {
           password: '',
           rollNumber: '',
           prn: '',
+          address: '',
           socialMedia: {
             facebook: '',
             instagram: '',
@@ -271,10 +299,10 @@ const StudentDetails = ({ onSelectStudent }) => {
         </div>
 
         {selectedStudentId && (
-          <div className="mb-4 bg-indigo-50 border border-indigo-100 rounded-md p-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
+          <div className="mb-4 bg-indigo-50 border border-indigo-100 rounded-md p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+              <div className="flex items-center space-x-2 mb-2 sm:mb-0">
+                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
                   {students.find(s => s._id === selectedStudentId)?.photo ? (
                     <img 
                       src={students.find(s => s._id === selectedStudentId)?.photo} 
@@ -292,13 +320,118 @@ const StudentDetails = ({ onSelectStudent }) => {
                   </span>
                 </div>
               </div>
-              <button 
-                onClick={() => setSelectedStudentId(null)}
-                className="text-xs text-gray-500 hover:text-gray-700"
-              >
-                Clear
-              </button>
+              
+              <div className="flex items-center space-x-2">
+                {/* Social Media Links */}
+                <div className="flex space-x-3 mr-3 rounded-md bg-white px-3 py-1.5 border border-indigo-100">
+                  {(() => {
+                    const selectedStudent = students.find(s => s._id === selectedStudentId);
+                    const socialMedia = selectedStudent?.socialMedia || {};
+                    
+                    if (!socialMedia.facebook && !socialMedia.instagram && !socialMedia.linkedin && !socialMedia.github) {
+                      return (
+                        <div className="text-xs text-gray-500">No social media profiles available</div>
+                      );
+                    }
+                    
+                    return (
+                      <>
+                        {socialMedia.facebook && (
+                          <a 
+                            href={socialMedia.facebook} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:text-blue-800 flex items-center"
+                            title={socialMedia.facebook}
+                          >
+                            <Facebook className="h-4 w-4" />
+                          </a>
+                        )}
+                        {socialMedia.instagram && (
+                          <a 
+                            href={socialMedia.instagram} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-pink-600 hover:text-pink-800 flex items-center"
+                            title={socialMedia.instagram}
+                          >
+                            <Instagram className="h-4 w-4" />
+                          </a>
+                        )}
+                        {socialMedia.linkedin && (
+                          <a 
+                            href={socialMedia.linkedin} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-700 hover:text-blue-900 flex items-center"
+                            title={socialMedia.linkedin}
+                          >
+                            <Linkedin className="h-4 w-4" />
+                          </a>
+                        )}
+                        {socialMedia.github && (
+                          <a 
+                            href={socialMedia.github} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-gray-800 hover:text-black flex items-center"
+                            title={socialMedia.github}
+                          >
+                            <Github className="h-4 w-4" />
+                          </a>
+                        )}
+                      </>
+                    );
+                  })()}
+                </div>
+                
+                <button 
+                  onClick={() => setSelectedStudentId(null)}
+                  className="text-xs text-gray-500 hover:text-gray-700 bg-white px-2 py-1 rounded-md border border-gray-200"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
+            
+            {/* Social Media Details */}
+            {(() => {
+              const selectedStudent = students.find(s => s._id === selectedStudentId);
+              const socialMedia = selectedStudent?.socialMedia || {};
+              
+              if (socialMedia.facebook || socialMedia.instagram || socialMedia.linkedin || socialMedia.github) {
+                return (
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs bg-white p-2 rounded-md border border-indigo-100">
+                    {socialMedia.facebook && (
+                      <div className="flex items-center overflow-hidden">
+                        <Facebook className="h-3 w-3 text-blue-600 mr-1 flex-shrink-0" />
+                        <span className="truncate text-gray-600">{socialMedia.facebook}</span>
+                      </div>
+                    )}
+                    {socialMedia.instagram && (
+                      <div className="flex items-center overflow-hidden">
+                        <Instagram className="h-3 w-3 text-pink-600 mr-1 flex-shrink-0" />
+                        <span className="truncate text-gray-600">{socialMedia.instagram}</span>
+                      </div>
+                    )}
+                    {socialMedia.linkedin && (
+                      <div className="flex items-center overflow-hidden">
+                        <Linkedin className="h-3 w-3 text-blue-700 mr-1 flex-shrink-0" />
+                        <span className="truncate text-gray-600">{socialMedia.linkedin}</span>
+                      </div>
+                    )}
+                    {socialMedia.github && (
+                      <div className="flex items-center overflow-hidden">
+                        <Github className="h-3 w-3 text-gray-800 mr-1 flex-shrink-0" />
+                        <span className="truncate text-gray-600">{socialMedia.github}</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+              
+              return null;
+            })()}
           </div>
         )}
 
@@ -355,12 +488,70 @@ const StudentDetails = ({ onSelectStudent }) => {
                     <div className="text-sm text-gray-500">{student.email}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <button
-                      onClick={() => handleEditSocialMedia(student)}
-                      className="text-blue-600 hover:text-blue-900"
-                    >
-                      Edit Social Media
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      {student.socialMedia ? (
+                        <>
+                          {student.socialMedia.facebook && (
+                            <a 
+                              href={student.socialMedia.facebook} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800"
+                              title="Facebook Profile"
+                            >
+                              <Facebook className="h-5 w-5" />
+                            </a>
+                          )}
+                          {student.socialMedia.instagram && (
+                            <a 
+                              href={student.socialMedia.instagram} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-pink-600 hover:text-pink-800"
+                              title="Instagram Profile"
+                            >
+                              <Instagram className="h-5 w-5" />
+                            </a>
+                          )}
+                          {student.socialMedia.linkedin && (
+                            <a 
+                              href={student.socialMedia.linkedin} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-700 hover:text-blue-900"
+                              title="LinkedIn Profile"
+                            >
+                              <Linkedin className="h-5 w-5" />
+                            </a>
+                          )}
+                          {student.socialMedia.github && (
+                            <a 
+                              href={student.socialMedia.github} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-gray-800 hover:text-gray-900"
+                              title="GitHub Profile"
+                            >
+                              <Github className="h-5 w-5" />
+                            </a>
+                          )}
+                          {!student.socialMedia.facebook && 
+                            !student.socialMedia.instagram && 
+                            !student.socialMedia.linkedin && 
+                            !student.socialMedia.github && (
+                              <span className="text-gray-400 text-sm italic">None</span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-gray-400 text-sm italic">None</span>
+                      )}
+                      <button
+                        onClick={() => handleEditSocialMedia(student)}
+                        className="ml-2 text-indigo-600 hover:text-indigo-900 text-xs px-2 py-1 bg-indigo-50 rounded-md"
+                      >
+                        Edit
+                      </button>
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center space-x-3">
@@ -454,6 +645,19 @@ const StudentDetails = ({ onSelectStudent }) => {
                       value={newStudent.prn}
                       onChange={(e) => setNewStudent({ ...newStudent, prn: e.target.value })}
                       required
+                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                      Address
+                    </label>
+                    <input
+                      type="text"
+                      id="address"
+                      value={newStudent.address}
+                      onChange={(e) => setNewStudent({ ...newStudent, address: e.target.value })}
                       className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                     />
                   </div>

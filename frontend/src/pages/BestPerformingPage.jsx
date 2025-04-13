@@ -146,7 +146,7 @@ const BestPerformingPage = () => {
       const response = await adminApi.getBestPerformingStudent();
       setBestStudent(response.data.bestStudent);
     } catch (error) {
-      setSnackbar({ open: true, message: 'Failed to fetch best performing student', severity: 'error' });
+      // setSnackbar({ open: true, message: 'Failed to fetch best performing student', severity: 'error' });
     }
   };
 

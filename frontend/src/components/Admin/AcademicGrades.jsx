@@ -133,61 +133,18 @@ const AcademicGrades = ({ selectedStudent }) => {
   const availableYears = ['1', '2', '3', '4'].filter(year => !years.includes(year));
 
   return (
-    <div>
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Academic Records</h2>
-            <p className="text-gray-500 mt-1">
-              Manage {selectedStudent.name}'s academic performance by year
-            </p>
+    <div className="space-y-8">
+      <h2 className="text-2xl font-bold text-gray-900">Academic Grades</h2>
+    
+      {!selectedStudent ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <div className="bg-indigo-50 rounded-full p-4 mb-4">
+            <BookOpen className="h-8 w-8 text-indigo-500" />
           </div>
-          
-          {selectedStudent && (
-            <div className="flex items-center space-x-4">
-              {selectedStudent.photo ? (
-                <img 
-                  src={selectedStudent.photo} 
-                  alt="Student" 
-                  className="w-12 h-12 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
-                  <span className="text-xl font-bold text-indigo-600">
-                    {selectedStudent.name.charAt(0)}
-                  </span>
-                </div>
-              )}
-              <span className="text-lg font-semibold">{selectedStudent.name}</span>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {years.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-8 text-center">
-          <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-gray-50 mb-4">
-            <Calendar className="h-8 w-8 text-gray-400" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Academic Data Available</h3>
-          <p className="text-gray-500 mb-6 max-w-md mx-auto">
-            There are no academic records available for this student yet. Add a new academic year to get started.
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No Student Selected</h3>
+          <p className="text-gray-600 text-center max-w-md">
+            Please select a student from the Student Details section to view and manage their academic grades.
           </p>
-          {availableYears.length > 0 && (
-            <div className="inline-flex flex-wrap justify-center gap-3 mt-2">
-              {availableYears.map(year => (
-                <Link
-                  key={year}
-                  to={`/admin/academic/${year}`}
-                  state={{ student: selectedStudent, yearData: {} }}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 transition-colors"
-                >
-                  <PlusCircle className="h-4 w-4 mr-2" />
-                  Add Year {year}
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
       ) : (
         <div className="space-y-8">
@@ -249,8 +206,8 @@ const AcademicGrades = ({ selectedStudent }) => {
             })}
           </div>
 
-          {/* Add New Year Section */}
-          {!existingGrades && (
+          {/* Add New Year Section - Only show if no existing grades */}
+          {years.length < 4 && (
             <div className="mt-8 pt-5 border-t border-gray-200">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Academic Year</h3>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

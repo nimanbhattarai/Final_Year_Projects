@@ -61,32 +61,33 @@ const getProfile = async (req, res) => {
       return res.status(404).json({ message: "Student not found" });
     }
 
-    if (!student.performance || !student.performance.academic) {
-      return res.status(404).json({ message: "No academic records found" });
+    // Process academic data if it exists
+    let academicYears = [];
+    
+    if (student.performance && student.performance.academic) {
+      // 🔥 Extract academic data properly
+      const academicData = student.performance.academic;
+
+      academicYears = Object.keys(academicData)
+        .filter(key => !key.startsWith("$")) // Ignore Mongoose internals
+        .map(year => ({
+          year,
+          semesters: Object.keys(academicData[year].semester || {}).map(semKey => ({
+            semester: semKey,
+            subjects: (academicData[year].semester[semKey] || []).map(subject => {
+              // Convert marks to SGPA scale if they're in percentage
+              const marks = parseFloat(subject.marks);
+              return {
+                ...subject,
+                marks: marks > 10 ? parseFloat((marks / 10).toFixed(2)) : parseFloat(marks.toFixed(2))
+              };
+            }),
+          })),
+        }));
     }
 
-    // 🔥 Extract academic data properly
-    const academicData = student.performance.academic;
-
-    let academicYears = Object.keys(academicData)
-      .filter(key => !key.startsWith("$")) // Ignore Mongoose internals
-      .map(year => ({
-        year,
-        semesters: Object.keys(academicData[year].semester || {}).map(semKey => ({
-          semester: semKey,
-          subjects: (academicData[year].semester[semKey] || []).map(subject => {
-            // Convert marks to SGPA scale if they're in percentage
-            const marks = parseFloat(subject.marks);
-            return {
-              ...subject,
-              marks: marks > 10 ? parseFloat((marks / 10).toFixed(2)) : parseFloat(marks.toFixed(2))
-            };
-          }),
-        })),
-      }));
-
     // Process extracurricular activities to convert grades to SGPA if needed
-    const extracurricular = (student.performance.extracurricular || []).map(activity => {
+    const extracurricular = (student.performance?.extracurricular || []).map(activity => {
       const grade = parseFloat(activity.grade || 0);
       return {
         ...activity,
@@ -95,7 +96,7 @@ const getProfile = async (req, res) => {
     });
 
     // Process teacher remarks to convert grades to SGPA if needed
-    const teacherRemarks = (student.performance.teacherRemarks || []).map(remark => {
+    const teacherRemarks = (student.performance?.teacherRemarks || []).map(remark => {
       const grade = parseFloat(remark.grade || 0);
       return {
         ...remark,
@@ -104,10 +105,16 @@ const getProfile = async (req, res) => {
     });
 
     res.status(200).json({
+      _id: student._id,
       name: student.name,
       email: student.email,
+      prn: student.prn,
+      rollNumber: student.rollNumber,
+      address: student.address,
       socialMedia: student.socialMedia || {},
       photo: student.photo,
+      createdAt: student.createdAt,
+      updatedAt: student.updatedAt,
       performance: {
         academic: academicYears, // ✅ Now structured properly with SGPA scale
         extracurricular: extracurricular,
@@ -156,7 +163,7 @@ const academicAnalysis = async (req, res) => {
 // Update registerStudent to handle photo upload
 const registerStudent = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, prn, rollNumber, address } = req.body;
 
     // Check if student already exists
     const studentExists = await Student.findOne({ email });
@@ -189,6 +196,9 @@ const registerStudent = async (req, res) => {
       email,
       password: hashedPassword,
       photo: photoUrl, // Add photo URL
+      prn,
+      rollNumber,
+      address
     });
 
     res.status(201).json({
@@ -198,6 +208,9 @@ const registerStudent = async (req, res) => {
         name: student.name,
         email: student.email,
         photo: student.photo,
+        prn: student.prn,
+        rollNumber: student.rollNumber,
+        address: student.address
       },
       message: "Student registered successfully",
     });

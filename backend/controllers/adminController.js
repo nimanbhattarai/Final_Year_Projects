@@ -81,7 +81,7 @@ const getStudents = async (req, res) => {
       .sort({ [sort]: 1 }) // 1 for ascending, -1 for descending
       .limit(limit * 1)
       .skip((page - 1) * limit)
-      .select('name email prn rollNumber photo'); // Select only needed fields
+      .select('name email prn rollNumber address photo socialMedia'); // Include socialMedia and address
 
     res.status(200).json({
       students,
@@ -309,7 +309,7 @@ const getStudent = async (req, res) => {
 
   try {
     const student = await Student.findById(studentId)
-      .select('_id name email socialMedia createdAt');
+      .select('_id name email prn rollNumber address socialMedia photo createdAt updatedAt');
     
     if (!student) {
       return res.status(404).json({ message: "Student not found" });

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Search, ChevronDown, ChevronUp, Eye, User } from 'lucide-react';
+import { Search, ChevronDown, ChevronUp, Eye, User, Facebook, Instagram, Linkedin, Github } from 'lucide-react';
 
 const StudentList = ({ onSelectStudent }) => {
   const [students, setStudents] = useState([]);
@@ -108,13 +108,15 @@ const StudentList = ({ onSelectStudent }) => {
                     )}
                   </div>
                 </th>
-                
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Social Media
+                </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center">
+                  <td colSpan="5" className="px-6 py-4 text-center">
                     <div className="flex justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
                     </div>
@@ -122,7 +124,7 @@ const StudentList = ({ onSelectStudent }) => {
                 </tr>
               ) : filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-4 text-center text-gray-500">
+                  <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
                     No students found
                   </td>
                 </tr>
@@ -155,7 +157,70 @@ const StudentList = ({ onSelectStudent }) => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">{student.rollNumber}</div>
                     </td>
-                   
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center space-x-2">
+                        {student.socialMedia ? (
+                          <>
+                            {student.socialMedia.facebook && (
+                              <a 
+                                href={student.socialMedia.facebook} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                                title="Facebook Profile"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Facebook className="h-4 w-4" />
+                              </a>
+                            )}
+                            {student.socialMedia.instagram && (
+                              <a 
+                                href={student.socialMedia.instagram} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-pink-600 hover:text-pink-800"
+                                title="Instagram Profile"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Instagram className="h-4 w-4" />
+                              </a>
+                            )}
+                            {student.socialMedia.linkedin && (
+                              <a 
+                                href={student.socialMedia.linkedin} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-700 hover:text-blue-900"
+                                title="LinkedIn Profile"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Linkedin className="h-4 w-4" />
+                              </a>
+                            )}
+                            {student.socialMedia.github && (
+                              <a 
+                                href={student.socialMedia.github} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-gray-800 hover:text-gray-900"
+                                title="GitHub Profile"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Github className="h-4 w-4" />
+                              </a>
+                            )}
+                            {!student.socialMedia.facebook && 
+                              !student.socialMedia.instagram && 
+                              !student.socialMedia.linkedin && 
+                              !student.socialMedia.github && (
+                                <span className="text-gray-400 text-xs italic">None</span>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-gray-400 text-xs italic">None</span>
+                        )}
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}

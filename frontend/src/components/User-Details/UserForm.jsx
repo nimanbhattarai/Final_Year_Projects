@@ -59,13 +59,13 @@ const subjectsBySemester = {
     'Project Planning & Management',
     'Web Services (ITC-V)',
     'Business Intelligence',
-    'Information Retrieval (Elective I)',
+    '(Elective I)',
     'IT Lab V',
     'Internship'
   ],
   8: [
     'Information Security',
-    'Cyber Security (Elective II)',
+    '(Elective II)',
     'Internet of Things',
     'Data Engineering',
     'IT Lab VI'
@@ -82,6 +82,12 @@ const UserForm = () => {
     prn: '',
     rollNumber: '',
     address: '',
+    socialMedia: {
+      facebook: '',
+      instagram: '',
+      linkedin: '',
+      github: ''
+    },
     academic: Object.fromEntries(
       Object.entries(subjectsBySemester).map(([sem, subjects]) => [
         sem,
@@ -107,6 +113,16 @@ const UserForm = () => {
   const handleBasicChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSocialMediaChange = (platform, value) => {
+    setFormData({
+      ...formData,
+      socialMedia: {
+        ...formData.socialMedia,
+        [platform]: value
+      }
+    });
   };
 
   const nextStep = () => {
@@ -191,11 +207,11 @@ const UserForm = () => {
       'Project Planning & Management': 'ppm',
       'Web Services (ITC-V)': 'webServices',
       'Business Intelligence': 'bi',
-      'Information Retrieval (Elective I)': 'ir',
+      '(Elective I)': 'ir',
       'IT Lab V': 'itl_5',
       'Internship': 'internship',
       'Information Security': 'infoSecurity',
-      'Cyber Security (Elective II)': 'cyberSecurity',
+      '(Elective II)': 'cyberSecurity',
       'Internet of Things': 'iot',
       'Data Engineering': 'dataEngineering',
       'IT Lab VI': 'itl_6'
@@ -217,6 +233,7 @@ const UserForm = () => {
       prn: formData.prn,
       rollNumber: formData.rollNumber,
       address: formData.address,
+      socialMedia: formData.socialMedia,
       ...subjectData
     };
   
@@ -249,59 +266,132 @@ const UserForm = () => {
           type="text" 
           name="name" 
           value={formData.name}
-          placeholder="Enter your full name"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
       </div>
+      
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
         <input 
           type="email" 
           name="email" 
           value={formData.email}
-          placeholder="your.email@bvucoep.edu.in"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">PRN (Permanent Registration Number)</label>
-        <input 
-          type="text" 
-          name="prn" 
-          value={formData.prn}
-          placeholder="Enter your PRN"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
-        />
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">PRN Number</label>
+          <input 
+            type="text" 
+            name="prn" 
+            value={formData.prn}
+            onChange={handleBasicChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
+          <input 
+            type="text" 
+            name="rollNumber" 
+            value={formData.rollNumber}
+            onChange={handleBasicChange}
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            required
+          />
+        </div>
       </div>
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Roll Number</label>
-        <input 
-          type="text" 
-          name="rollNumber" 
-          value={formData.rollNumber}
-          placeholder="Enter your roll number"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          onChange={handleBasicChange} 
-          required 
-        />
-      </div>
+      
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
         <textarea 
           name="address" 
           value={formData.address}
-          placeholder="Enter your complete address"
-          className="block w-full px-4 py-3 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 bg-gray-50 text-gray-900" 
-          rows="3" 
-          onChange={handleBasicChange} 
-          required 
+          onChange={handleBasicChange}
+          rows="3"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          required
         />
+      </div>
+
+      {/* Social Media Profiles Section */}
+      <div className="pt-4 border-t border-gray-200">
+        <h3 className="text-lg font-medium text-gray-900 mb-3">Social Media Profiles</h3>
+        <p className="text-sm text-gray-500 mb-4">Add your social media profiles so teachers and administrators can view them</p>
+        
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn Profile</label>
+            <div className="mt-1 flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                linkedin.com/in/
+              </span>
+              <input
+                type="text"
+                placeholder="username"
+                value={formData.socialMedia.linkedin.replace(/^https?:\/\/(www\.)?linkedin\.com\/in\//i, '')}
+                onChange={(e) => handleSocialMediaChange('linkedin', `https://linkedin.com/in/${e.target.value}`)}
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">GitHub Profile</label>
+            <div className="mt-1 flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                github.com/
+              </span>
+              <input
+                type="text"
+                placeholder="username"
+                value={formData.socialMedia.github.replace(/^https?:\/\/(www\.)?github\.com\//i, '')}
+                onChange={(e) => handleSocialMediaChange('github', `https://github.com/${e.target.value}`)}
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Instagram Profile</label>
+            <div className="mt-1 flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                instagram.com/
+              </span>
+              <input
+                type="text"
+                placeholder="username"
+                value={formData.socialMedia.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')}
+                onChange={(e) => handleSocialMediaChange('instagram', `https://instagram.com/${e.target.value}`)}
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Facebook Profile</label>
+            <div className="mt-1 flex rounded-md shadow-sm">
+              <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 sm:text-sm">
+                facebook.com/
+              </span>
+              <input
+                type="text"
+                placeholder="username"
+                value={formData.socialMedia.facebook.replace(/^https?:\/\/(www\.)?facebook\.com\//i, '')}
+                onChange={(e) => handleSocialMediaChange('facebook', `https://facebook.com/${e.target.value}`)}
+                className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

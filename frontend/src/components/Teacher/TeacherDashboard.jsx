@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Route, Routes, Link, useNavigate, useLocation } from 'react-router-dom';
-import { GraduationCap, Award, UserCircle, BookOpen, ArrowLeft, ChevronRight, User, LogOut, BarChart2, TrendingUp } from 'lucide-react';
+import { GraduationCap, Award, UserCircle, BookOpen, ArrowLeft, ChevronRight, User, LogOut, BarChart2, TrendingUp, Facebook, Instagram, Linkedin, Github } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import StudentList from './StudentList';
@@ -190,6 +190,56 @@ const TeacherDashboard = () => {
                   </div>
                   <p className="text-xs text-gray-500">{selectedStudent.email}</p>
                 </div>
+                
+                {/* Social Media Icons */}
+                {selectedStudent.socialMedia && Object.values(selectedStudent.socialMedia).some(link => link && link.trim() !== '') && (
+                  <div className="flex ml-4 pl-4 border-l border-indigo-200">
+                    {selectedStudent.socialMedia.facebook && (
+                      <a 
+                        href={selectedStudent.socialMedia.facebook} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-gray-500 hover:text-blue-600 mx-1"
+                        title="Facebook Profile"
+                      >
+                        <Facebook size={16} />
+                      </a>
+                    )}
+                    {selectedStudent.socialMedia.instagram && (
+                      <a 
+                        href={selectedStudent.socialMedia.instagram} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-gray-500 hover:text-pink-600 mx-1"
+                        title="Instagram Profile"
+                      >
+                        <Instagram size={16} />
+                      </a>
+                    )}
+                    {selectedStudent.socialMedia.linkedin && (
+                      <a 
+                        href={selectedStudent.socialMedia.linkedin} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-gray-500 hover:text-blue-700 mx-1"
+                        title="LinkedIn Profile"
+                      >
+                        <Linkedin size={16} />
+                      </a>
+                    )}
+                    {selectedStudent.socialMedia.github && (
+                      <a 
+                        href={selectedStudent.socialMedia.github} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="text-gray-500 hover:text-gray-900 mx-1"
+                        title="GitHub Profile"
+                      >
+                        <Github size={16} />
+                      </a>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>

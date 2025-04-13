@@ -136,9 +136,9 @@ const addTeacherRemark = asyncHandler(async (req, res) => {
   const { teacherName, remark, grade } = req.body;
 
   // Validate input
-  if (!teacherName || !remark || grade === undefined) {
+  if (!remark || grade === undefined) {
     res.status(400);
-    throw new Error('Please provide all required fields');
+    throw new Error('Please provide remark and grade');
   }
 
   const student = await Student.findById(studentId);
@@ -157,7 +157,7 @@ const addTeacherRemark = asyncHandler(async (req, res) => {
 
   // Add new remark
   student.performance.teacherRemarks.push({
-    teacherName,
+    teacherName: teacherName || '', // Make teacherName optional with default empty string
     remark,
     grade: Number(grade),
     date: new Date()

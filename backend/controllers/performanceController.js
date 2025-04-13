@@ -140,6 +140,11 @@ const updateExtracurricularGrades = async (req, res) => {
 const updateTeacherRemarks = async (req, res) => {
   const { studentId, teacherName, remark, grade } = req.body;
   console.log("Hii", req.body)
+  
+  if (!studentId || !remark || grade === undefined) {
+    return res.status(400).json({ message: "Please provide student ID, remark and grade" });
+  }
+  
   try {
     const student = await Student.findById(studentId);
     if (!student) {
@@ -147,7 +152,11 @@ const updateTeacherRemarks = async (req, res) => {
     }
 
     // Update teacher remarks
-    student.performance.teacherRemarks.push({ teacherName, remark, grade });
+    student.performance.teacherRemarks.push({ 
+      teacherName: teacherName || '', // Make teacherName optional with default empty string
+      remark, 
+      grade 
+    });
     await student.save();
 
     res.status(200).json({ message: "Teacher remarks updated" });
