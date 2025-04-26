@@ -23,7 +23,7 @@ const TeacherDashboard = () => {
     const fetchTeacherInfo = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('https://final-year-projects-backend.onrender.com/api/teacher/profile', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/teacher/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTeacherInfo(response.data.data);

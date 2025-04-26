@@ -31,7 +31,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
     const fetchTeacherProfile = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('https://final-year-projects-backend.onrender.com/api/teacher/profile', {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/teacher/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         setTeacherInfo(response.data.data);
@@ -49,7 +49,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/teacher/remarks/${selectedStudent._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setExistingRemarks(response.data.teacherRemarks || []);
@@ -73,7 +73,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
     try {
       const token = localStorage.getItem('token');
       await axios.post(
-        `https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}`,
+        `${import.meta.env.VITE_API_URL}/teacher/remarks/${selectedStudent._id}`,
         {
           teacherName: teacherInfo?.name || 'Teacher',
           remark: formData.remark,
@@ -112,7 +112,7 @@ const TeacherRemarks = ({ selectedStudent }) => {
 
     try {
       const token = localStorage.getItem('token');
-      await axios.delete(`https://final-year-projects-backend.onrender.com/api/teacher/remarks/${selectedStudent._id}/${index}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/teacher/remarks/${selectedStudent._id}/${index}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

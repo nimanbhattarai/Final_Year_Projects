@@ -36,7 +36,7 @@ const TeacherForm = () => {
 
     try {
       setSubmitting(true);
-      const response = await axios.post('https://final-year-projects-backend.onrender.com/api/teacher/register', formData);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/teacher/register`, formData);
       
       if (response.data.success) {
         // If temporary password is in the response, save it

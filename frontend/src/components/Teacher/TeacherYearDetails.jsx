@@ -113,7 +113,7 @@ const TeacherYearDetails = () => {
     try {
       // Use axios directly to fetch the data
       const token = localStorage.getItem('token');
-      const response = await axios.get(`https://final-year-projects-backend.onrender.com/api/performance/${student._id}`, {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/performance/${student._id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       

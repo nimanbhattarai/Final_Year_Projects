@@ -29,6 +29,7 @@ const PhotoUploader = ({ onPhotoSelect, currentPhoto = null }) => {
             <User className="h-12 w-12 text-gray-400" />
           )}
         </div>
+      </div>
         <button 
           type="button"
           className="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white p-1.5 rounded-full shadow-md transition-colors duration-200"
@@ -36,7 +37,6 @@ const PhotoUploader = ({ onPhotoSelect, currentPhoto = null }) => {
         >
           <Camera className="h-3 w-3" />
         </button>
-      </div>
       
       <input 
         type="file" 
