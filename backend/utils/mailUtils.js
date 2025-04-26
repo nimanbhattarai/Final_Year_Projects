@@ -29,7 +29,7 @@ async function sendPasswordEmail(toEmail, password) {
     });
 
     const mailOptions = {
-        from: 'scholarlybvdu@gmail.com',
+        from: 'bvduscholarly@gmail.com',
         to: toEmail,
         subject: 'Your Scholarly Account Password',
         html: `<p>Hello,</p>
