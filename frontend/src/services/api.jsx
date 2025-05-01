@@ -30,7 +30,8 @@ api.interceptors.response.use(
 
 export const adminApi = {
   login: (credentials) => api.post('/admin/login', credentials),
-  getStudents: () => api.get('/admin/students'),
+  getStudents: ({ page = 1, limit = 10, sort = 'name', search = '' }) => 
+    api.get(`/admin/students?page=${page}&limit=${limit}&sort=${sort}&search=${search}`),
   
   // Add new student
   addStudent: (formData) => {

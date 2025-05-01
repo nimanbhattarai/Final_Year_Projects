@@ -29,7 +29,8 @@ const StudentDetails = ({ onSelectStudent }) => {
       instagram: '',
       linkedin: '',
       github: ''
-    }
+    },
+    photo: null
   });
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,44 +38,36 @@ const StudentDetails = ({ onSelectStudent }) => {
   const [photo, setPhoto] = useState(null);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 10
+  });
+  const [sort, setSort] = useState('name');
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchStudents();
-  }, []);
+  }, [pagination.currentPage, sort, searchTerm]);
 
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await adminApi.getStudents();
-      if (response.data && Array.isArray(response.data)) {
-        // Get full details for each student including socialMedia
-        const studentsWithFullDetails = await Promise.all(
-          response.data.map(async (student) => {
-            try {
-              const detailsResponse = await adminApi.getStudent(student._id);
-              return detailsResponse.data || student;
-            } catch (error) {
-              console.error(`Error fetching details for student ${student._id}:`, error);
-              return student;
-            }
-          })
-        );
-        setStudents(studentsWithFullDetails);
-      } else if (response.data.students && Array.isArray(response.data.students)) {
-        // Same for paginated response
-        const studentsWithFullDetails = await Promise.all(
-          response.data.students.map(async (student) => {
-            try {
-              const detailsResponse = await adminApi.getStudent(student._id);
-              return detailsResponse.data || student;
-            } catch (error) {
-              console.error(`Error fetching details for student ${student._id}:`, error);
-              return student;
-            }
-          })
-        );
-        setStudents(studentsWithFullDetails);
+      const response = await adminApi.getStudents({
+        page: pagination.currentPage,
+        limit: pagination.limit,
+        sort,
+        search: searchTerm
+      });
+      
+      if (response.data) {
+        setStudents(response.data.students || []);
+        setPagination({
+          ...pagination,
+          totalPages: response.data.totalPages,
+          total: response.data.total
+        });
       } else {
         console.error('Unexpected response format:', response.data);
         toast.error('Failed to load students: Invalid data format');
@@ -89,6 +82,29 @@ const StudentDetails = ({ onSelectStudent }) => {
     }
   };
 
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({
+      ...prev,
+      currentPage: newPage
+    }));
+  };
+
+  const handleSortChange = (newSort) => {
+    setSort(newSort);
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1
+    }));
+  };
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    setPagination(prev => ({
+      ...prev,
+      currentPage: 1
+    }));
+  };
+
   const handleAddStudent = async (e) => {
     e.preventDefault();
     
@@ -99,22 +115,24 @@ const StudentDetails = ({ onSelectStudent }) => {
     }
 
     try {
+      setSubmitting(true);
       const formData = new FormData();
       formData.append('name', newStudent.name);
       formData.append('email', newStudent.email);
       formData.append('password', newStudent.password);
       formData.append('rollNumber', newStudent.rollNumber);
       formData.append('prn', newStudent.prn);
-      formData.append('address', newStudent.address);
+      formData.append('address', newStudent.address || '');
       formData.append('socialMedia', JSON.stringify(newStudent.socialMedia));
       
-      if (newStudent.photo) {
-        formData.append('photo', newStudent.photo);
+      if (photo) {
+        formData.append('photo', photo);
       }
 
       const response = await adminApi.addStudent(formData);
       
       if (response.data.success) {
+        // Reset form state
         setNewStudent({
           name: '',
           email: '',
@@ -123,18 +141,28 @@ const StudentDetails = ({ onSelectStudent }) => {
           prn: '',
           address: '',
           socialMedia: {
+            facebook: '',
+            instagram: '',
             linkedin: '',
-            github: '',
-            twitter: ''
+            github: ''
           },
           photo: null
         });
+        setPhoto(null);
+        setPhotoPreview(null);
         setError('');
+        setShowAddForm(false);
         toast.success('Student added successfully');
-        fetchStudents();
+        
+        // Fetch updated student list
+        await fetchStudents();
       }
     } catch (err) {
+      console.error('Error adding student:', err);
       setError(err.response?.data?.message || 'Failed to add student');
+      toast.error(err.response?.data?.message || 'Failed to add student');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -248,7 +276,7 @@ const StudentDetails = ({ onSelectStudent }) => {
                 placeholder="Search students..."
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearch(e.target.value)}
               />
             </div>
             <button
@@ -538,6 +566,48 @@ const StudentDetails = ({ onSelectStudent }) => {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-gray-700">
+              Showing {students.length} of {pagination.total} students
+            </span>
+            <select
+              value={pagination.limit}
+              onChange={(e) => setPagination(prev => ({
+                ...prev,
+                limit: Number(e.target.value),
+                currentPage: 1
+              }))}
+              className="text-sm border-gray-300 rounded-md"
+            >
+              <option value={5}>5 per page</option>
+              <option value={10}>10 per page</option>
+              <option value={20}>20 per page</option>
+              <option value={50}>50 per page</option>
+            </select>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+              className="px-3 py-1 border rounded-md disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-gray-700">
+              Page {pagination.currentPage} of {pagination.totalPages}
+            </span>
+            <button
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages}
+              className="px-3 py-1 border rounded-md disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
 
