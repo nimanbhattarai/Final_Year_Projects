@@ -442,7 +442,26 @@ const deleteTeacherRemarks = async (req, res) => {
 // Get All Students with Performance Data
 const getAllStudentsPerformance = async (req, res) => {
   try {
-    const students = await Student.find();
+    const { page = 1, limit = 10, sort = 'totalScore', search } = req.query;
+    const query = {};
+
+    // Add search by name, email, or PRN if provided
+    if (search) {
+      query.$or = [
+        { name: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { prn: new RegExp(search, 'i') }
+      ];
+    }
+
+    // Get total count for pagination
+    const total = await Student.countDocuments(query);
+
+    // Get students with pagination
+    const students = await Student.find(query)
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
     if (!students.length) {
       return res.status(404).json({ message: "No students found" });
     }
@@ -538,10 +557,20 @@ const getAllStudentsPerformance = async (req, res) => {
       };
     });
     
-    // Sort students by total score (descending)
-    studentsWithPerformance.sort((a, b) => b.totalScore - a.totalScore);
+    // Sort students by the specified field (default: totalScore)
+    studentsWithPerformance.sort((a, b) => {
+      if (sort === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      return b[sort] - a[sort];
+    });
     
-    res.status(200).json(studentsWithPerformance);
+    res.status(200).json({
+      data: studentsWithPerformance,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
   } catch (error) {
     console.error('Error fetching students with performance:', error);
     res.status(500).json({ message: error.message });

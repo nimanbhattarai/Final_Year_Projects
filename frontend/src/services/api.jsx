@@ -32,10 +32,9 @@ export const adminApi = {
   login: (credentials) => api.post('/admin/login', credentials),
   getStudents: () => api.get('/admin/students'),
   
-  // Update to accept photo upload
-  registerStudent: (formData) => {
-    // Use the correct endpoint and send the FormData directly
-    return api.post('/admin/student/register', formData, {
+  // Add new student
+  addStudent: (formData) => {
+    return api.post('/admin/student/add', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

@@ -193,16 +193,34 @@ const deleteStudent = async (req, res) => {
   }
 };
 
-// Get all students with performance data for rankings
+// Get all students with their performance data
 const getStudentsWithPerformance = async (req, res) => {
   try {
-    const students = await Student.find();
-    
+    const { page = 1, limit = 10, sort = 'totalScore', search } = req.query;
+    const query = {};
+
+    // Add search by name, email, or PRN if provided
+    if (search) {
+      query.$or = [
+        { name: new RegExp(search, 'i') },
+        { email: new RegExp(search, 'i') },
+        { prn: new RegExp(search, 'i') }
+      ];
+    }
+
+    // Get total count for pagination
+    const total = await Student.countDocuments(query);
+
+    // Get students with pagination
+    const students = await Student.find(query)
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
     if (!students.length) {
       return res.status(404).json({ message: "No students found" });
     }
 
-    // Process each student to calculate performance metrics
+    // Transform each student to include performance calculations
     const studentsWithPerformance = students.map(student => {
       // Calculate academic scores by year and overall
       const academicByYear = {};
@@ -293,10 +311,20 @@ const getStudentsWithPerformance = async (req, res) => {
       };
     });
     
-    // Sort students by total score (descending)
-    studentsWithPerformance.sort((a, b) => b.totalScore - a.totalScore);
+    // Sort students by the specified field (default: totalScore)
+    studentsWithPerformance.sort((a, b) => {
+      if (sort === 'name') {
+        return a.name.localeCompare(b.name);
+      }
+      return b[sort] - a[sort];
+    });
     
-    res.status(200).json(studentsWithPerformance);
+    res.status(200).json({
+      data: studentsWithPerformance,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      total
+    });
   } catch (error) {
     console.error('Error fetching students with performance:', error);
     res.status(500).json({ message: error.message });
@@ -372,6 +400,73 @@ const deleteTeacher = async (req, res) => {
   }
 };
 
+// Add new student
+const addStudent = async (req, res) => {
+  try {
+    const { name, email, password, prn, rollNumber, address, socialMedia } = req.body;
+    const photo = req.file;
+
+    // Check if student already exists
+    const existingStudent = await Student.findOne({ $or: [{ email }, { prn }] });
+    if (existingStudent) {
+      return res.status(400).json({ message: "Student with this email or PRN already exists" });
+    }
+
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Parse socialMedia if it's a string
+    let parsedSocialMedia = {};
+    if (typeof socialMedia === 'string') {
+      try {
+        parsedSocialMedia = JSON.parse(socialMedia);
+      } catch (error) {
+        console.error('Error parsing socialMedia:', error);
+        parsedSocialMedia = {};
+      }
+    } else {
+      parsedSocialMedia = socialMedia || {};
+    }
+
+    // Create new student
+    const newStudent = await Student.create({
+      name,
+      email,
+      password: hashedPassword,
+      prn,
+      rollNumber,
+      address,
+      photo: photo ? photo.path : undefined,
+      socialMedia: parsedSocialMedia,
+      performance: {
+        academic: new Map(),
+        extracurricular: [],
+        teacherRemarks: []
+      }
+    });
+
+    // Respond with success message
+    res.status(201).json({
+      success: true,
+      message: "Student added successfully",
+      student: {
+        id: newStudent._id,
+        name: newStudent.name,
+        email: newStudent.email,
+        prn: newStudent.prn,
+        rollNumber: newStudent.rollNumber
+      }
+    });
+  } catch (error) {
+    console.error('Error adding student:', error);
+    res.status(500).json({ 
+      success: false,
+      message: error.message || 'Failed to add student'
+    });
+  }
+};
+
 module.exports = {
   registerAdmin,
   loginAdmin,
@@ -381,5 +476,6 @@ module.exports = {
   getStudentsWithPerformance,
   getStudent,
   getTeachers,
-  deleteTeacher
+  deleteTeacher,
+  addStudent
 };

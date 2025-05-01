@@ -94,29 +94,11 @@ const StudentDetails = ({ onSelectStudent }) => {
     
     // Validate form
     if (!newStudent.name || !newStudent.email || !newStudent.password || !newStudent.rollNumber || !newStudent.prn) {
-      toast.error('Please fill all required fields');
+      setError('Please fill in all required fields');
       return;
     }
-    
-    // Validate photo if provided
-    if (photo) {
-      // Check file size (5MB max)
-      if (photo.size > 5 * 1024 * 1024) {
-        toast.error('Photo size must be less than 5MB');
-        return;
-      }
-      
-      // Check file type
-      if (!photo.type.startsWith('image/')) {
-        toast.error('Only image files are allowed for photo');
-        return;
-      }
-    }
-    
-    setSubmitting(true);
-    
+
     try {
-      // Create form data for mixed content (file + text)
       const formData = new FormData();
       formData.append('name', newStudent.name);
       formData.append('email', newStudent.email);
@@ -124,20 +106,15 @@ const StudentDetails = ({ onSelectStudent }) => {
       formData.append('rollNumber', newStudent.rollNumber);
       formData.append('prn', newStudent.prn);
       formData.append('address', newStudent.address);
-    
+      formData.append('socialMedia', JSON.stringify(newStudent.socialMedia));
       
-      // Only append photo if it exists
-      if (photo) {
-        formData.append('photo', photo);
+      if (newStudent.photo) {
+        formData.append('photo', newStudent.photo);
       }
-      
-      // Send registration request
-      const response = await adminApi.registerStudent(formData);
+
+      const response = await adminApi.addStudent(formData);
       
       if (response.data.success) {
-        toast.success('Student added successfully');
-        
-        // Reset form
         setNewStudent({
           name: '',
           email: '',
@@ -146,32 +123,18 @@ const StudentDetails = ({ onSelectStudent }) => {
           prn: '',
           address: '',
           socialMedia: {
-            facebook: '',
-            instagram: '',
             linkedin: '',
-            github: ''
-          }
+            github: '',
+            twitter: ''
+          },
+          photo: null
         });
-        setPhoto(null);
-        setPhotoPreview(null);
-        
-        // Refresh student list
+        setError('');
+        toast.success('Student added successfully');
         fetchStudents();
-
-        // Close the form
-        setShowAddForm(false);
-
-        // Redirect to the Academic Grades section for the newly added student
-        const newStudentId = response.data._id;
-        navigate(`/admin/academic/${newStudentId}`);
-      } else {
-        toast.error(response.data.message || 'Failed to add student');
       }
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast.error(error.response?.data?.message || 'An error occurred');
-    } finally {
-      setSubmitting(false);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to add student');
     }
   };
 

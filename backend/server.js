@@ -1,6 +1,8 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
+const fs = require('fs');
+const path = require('path');
 const connectDB = require("./config/db");
 const adminRoutes = require("./routes/adminRoutes");
 const performanceRoutes = require("./routes/performanceRoutes");
@@ -13,11 +15,20 @@ connectDB();
 
 const app = express();
 
+// Create uploads directory if it doesn't exist
+const uploadsDir = path.join(__dirname, 'uploads', 'students');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // CORS configuration
 app.use(cors());
 
 app.use(express.json());
 // app.use(bodyParser.json());
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/performance", performanceRoutes);

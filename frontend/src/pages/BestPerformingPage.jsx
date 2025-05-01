@@ -26,6 +26,12 @@ const BestPerformingPage = () => {
       try {
         // First try the new enhanced endpoint
         response = await performanceApi.getAllStudentsPerformance();
+        // Handle the new paginated response format
+        if (response.data && response.data.data) {
+          setStudents(response.data.data);
+        } else {
+          setStudents([]);
+        }
       } catch (enhancedApiError) {
         console.log('Enhanced API not available, falling back to basic API');
         
@@ -123,7 +129,7 @@ const BestPerformingPage = () => {
               }));
             }
             
-            response.data = transformedData;
+            setStudents(transformedData);
           }
         } else {
           // If it failed for a reason other than 404, re-throw the error
@@ -131,10 +137,10 @@ const BestPerformingPage = () => {
         }
       }
       
-      console.log('Student performance data:', response.data);
-      setStudents(response.data || []);
+      console.log('Student performance data:', students);
     } catch (error) {
       console.error('Error fetching student data:', error);
+      setStudents([]);
       // toast.error('Failed to fetch student performance data');
     } finally {
       setLoading(false);
