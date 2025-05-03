@@ -1,9 +1,96 @@
 import { useState, useEffect } from 'react';
 import { adminApi } from '../../services/api';
-import { Search, UserPlus, Trash2, User, Linkedin, Github, Instagram, Facebook } from 'lucide-react';
+import { Search, UserPlus, Trash2, User, Linkedin, Github, Instagram, Facebook, Camera } from 'lucide-react';
 import toast from 'react-hot-toast';
 import PhotoUploader from './PhotoUploader';
 import { useNavigate } from 'react-router-dom';
+
+// Subject structure by year and semester - same as in YearDetails.jsx
+const subjectsByYearAndSemester = {
+  '1': {
+    '1': [
+      'Mathematics For Computing - I',
+      'Physics For Computing',
+      'Computer Aided Drafting',
+      'Digital Electronics',
+      'Structured Programming',
+      'Computer System Workshop Technology'
+    ],
+    '2': [
+      'Mathematics For Computing - II',
+      'Organic & ElectroChemistry',
+      'Electrical Technology',
+      'Object Oriented Programming',
+      'Programing Paradigms',
+      'Web Programming'
+    ]
+  },
+  '2': {
+    '3': [
+      'Discrete Structures & Graph Theory',
+      'Data Structures',
+      'Database Management Systems',
+      'ITC-I: Software Engineering',
+      'Computer Communication & Network',
+      'Information Technology Laboratory-I',
+      'Vocational Course-I'
+    ],
+    '4': [
+      'ITC-II: Infrastructure Management',
+      'Formal Languages & Computing Theory',
+      'Microprocessor & Microcontroller',
+      'Applied Algorithms',
+      'Operating Systems',
+      'Information Technology Laboratory-II',
+      'Vocational Course-II'
+    ]
+  },
+  '3': {
+    '5': [
+      'Human Computer Interaction ',
+      'Artificial Intelligence and Machine Learning ',
+      'Computer Architecture and Organization',
+      'ITC-III: Advanced Database System',
+      'Mobile Application Development',
+      'Information Technology Laboratory-III',
+      'Vocational Course-III' 
+    ],
+    '6': [
+      'ITC-IV: Cloud Computing',
+      'Software Testing & Quality Assurance',
+      'Data Warehousing & Data Mining',
+      'Quantitative Techniques, Communication And Values',
+      'Agile Methodologies',
+      'Information Technology Laboratory-IV',
+      'Vocational Course-IV'
+    ]
+  },
+  '4': {
+    '7': [
+      'Project Planning & Management',
+      'ITC-V: Web Services',
+      'Business Intelligence',
+      'Elective - I: Information Retrieval',
+      'Elective - I: Software Architecture',
+      'Elective - I: User Experience',
+      'Elective - I: Storage Area Network',
+      'Information Technology Laboratory-V',
+      'Internship',
+      'Project Stage 1'
+    ],
+    '8': [
+      'Information Security',
+      'Elective - II: Semantic Web Mining', 
+      'Elective - II: Social Analytics in Digital Marketing ',
+      'Elective - II: Management Information System',
+      'Elective - II:  Cyber security',
+      'Internet of Things',
+      'Data Engineering',
+      'Information Technology Laboratory-VI',
+      'Project Stage 2'
+    ]
+  }
+};
 
 const StudentDetails = ({ onSelectStudent }) => {
   const [students, setStudents] = useState([]);
@@ -45,6 +132,10 @@ const StudentDetails = ({ onSelectStudent }) => {
     limit: 10
   });
   const [sort, setSort] = useState('name');
+  const [showPhotoUpload, setShowPhotoUpload] = useState(null);
+  const [updatingPhoto, setUpdatingPhoto] = useState(false);
+  const [photoToUpdate, setPhotoToUpdate] = useState(null);
+  const [photoPreviewUpdate, setPhotoPreviewUpdate] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -132,6 +223,27 @@ const StudentDetails = ({ onSelectStudent }) => {
       const response = await adminApi.addStudent(formData);
       
       if (response.data.success) {
+        // Initialize academic structure with empty subjects
+        const student = response.data.student;
+        
+        // Initialize academic grades for all years and semesters
+        for (let year = 1; year <= 4; year++) {
+          const yearStr = year.toString();
+          const semesters = Object.keys(subjectsByYearAndSemester[yearStr] || {});
+          
+          for (const semester of semesters) {
+            const subjects = subjectsByYearAndSemester[yearStr][semester] || [];
+            const gradesData = subjects.map(subject => ({ subject, marks: 0 }));
+            
+            await adminApi.updateAcademicGrades({
+              studentId: student._id,
+              year: yearStr,
+              semester,
+              grades: gradesData,
+            });
+          }
+        }
+        
         // Reset form state
         setNewStudent({
           name: '',
@@ -152,7 +264,7 @@ const StudentDetails = ({ onSelectStudent }) => {
         setPhotoPreview(null);
         setError('');
         setShowAddForm(false);
-        toast.success('Student added successfully');
+        toast.success('Student added successfully with all semester subjects');
         
         // Fetch updated student list
         await fetchStudents();
@@ -253,6 +365,62 @@ const StudentDetails = ({ onSelectStudent }) => {
       reader.readAsDataURL(file);
     } else {
       setPhotoPreview(null);
+    }
+  };
+
+  const handleUpdatePhoto = async () => {
+    if (!photoToUpdate || !showPhotoUpload) {
+      toast.error('Please select a photo');
+      return;
+    }
+
+    try {
+      setUpdatingPhoto(true);
+      
+      await adminApi.uploadStudentPhoto(showPhotoUpload._id, photoToUpdate);
+      
+      // Create a local URL for instant UI update
+      const photoUrl = URL.createObjectURL(photoToUpdate);
+      
+      // Update the student in the local state
+      setStudents(prevStudents => 
+        prevStudents.map(student => 
+          student._id === showPhotoUpload._id 
+            ? { ...student, photo: photoUrl }
+            : student
+        )
+      );
+      
+      // If this is the selected student, update the selection
+      if (selectedStudentId === showPhotoUpload._id) {
+        const updatedStudent = { ...showPhotoUpload, photo: photoUrl };
+        onSelectStudent(updatedStudent);
+      }
+      
+      toast.success('Photo updated successfully');
+      setShowPhotoUpload(null);
+      setPhotoToUpdate(null);
+      setPhotoPreviewUpdate(null);
+    } catch (error) {
+      console.error('Error updating photo:', error);
+      toast.error('Failed to update photo');
+    } finally {
+      setUpdatingPhoto(false);
+    }
+  };
+
+  const handlePhotoUpdateSelect = (file) => {
+    setPhotoToUpdate(file);
+    
+    // Create preview
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreviewUpdate(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPhotoPreviewUpdate(null);
     }
   };
 
@@ -454,11 +622,9 @@ const StudentDetails = ({ onSelectStudent }) => {
                       : 'hover:bg-gray-50 border-l-4 border-transparent'
                   } transition-colors duration-200`}
                 >
-                  <td className="px-6 py-4 whitespace-nowrap" 
-                          onClick={() => handleSelectStudent(student)}
-                  >
-                    <div className="flex items-center space-x-4 mb-6">
-                      <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center space-x-4 mb-6" onClick={() => handleSelectStudent(student)}>
+                      <div className="relative w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold mr-2">
                         {student.photo ? (
                           <img 
                             src={student.photo} 
@@ -468,6 +634,16 @@ const StudentDetails = ({ onSelectStudent }) => {
                         ) : (
                           student.name.charAt(0)
                         )}
+                        <button 
+                          className="absolute -bottom-1 -right-1 bg-indigo-500 text-white rounded-full p-1.5 shadow-sm hover:bg-indigo-600 transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            setShowPhotoUpload(student);
+                          }}
+                          title="Change photo"
+                        >
+                          <Camera className="h-3.5 w-3.5" />
+                        </button>
                       </div>
                       <div>
                         <h2 className="text-xl font-bold">{student.name}</h2>
@@ -890,6 +1066,78 @@ const StudentDetails = ({ onSelectStudent }) => {
                 className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md hover:bg-indigo-700"
               >
                 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Photo Update Modal */}
+      {showPhotoUpload && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4">Update Student Photo</h3>
+            <div className="flex flex-col items-center space-y-4">
+              <div className="relative w-32 h-32 rounded-full overflow-hidden border-2 border-indigo-100 mb-4">
+                {photoPreviewUpdate ? (
+                  <img 
+                    src={photoPreviewUpdate} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : showPhotoUpload.photo ? (
+                  <img 
+                    src={showPhotoUpload.photo} 
+                    alt="Current" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                    <User className="h-16 w-16 text-gray-400" />
+                  </div>
+                )}
+              </div>
+              
+              <p className="text-sm text-gray-600 mb-2">Student: <span className="font-medium">{showPhotoUpload.name}</span></p>
+              
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select new photo
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      handlePhotoUpdateSelect(file);
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Recommended size: 200x200 pixels. Max file size: 2MB
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                type="button"
+                onClick={() => setShowPhotoUpload(null)}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleUpdatePhoto}
+                disabled={updatingPhoto || !photoToUpdate}
+                className={`px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 ${
+                  (updatingPhoto || !photoToUpdate) ? 'opacity-75 cursor-not-allowed' : ''
+                }`}
+              >
+                {updatingPhoto ? 'Updating...' : 'Update Photo'}
               </button>
             </div>
           </div>

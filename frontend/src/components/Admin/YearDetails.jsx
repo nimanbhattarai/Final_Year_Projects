@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { adminApi } from '../../services/api';
-import { Trash2, Plus, ArrowLeft, BookOpen } from 'lucide-react';
+import { Trash2, Plus, ArrowLeft, BookOpen, Edit, Check, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const subjectsByYearAndSemester = {
@@ -73,7 +73,8 @@ const subjectsByYearAndSemester = {
       'Elective - I: User Experience',
       'Elective - I: Storage Area Network',
       'Information Technology Laboratory-V',
-      'Internship'
+      'Internship',
+      'Project Stage 1'
     ],
     '8': [
       'Information Security',
@@ -84,6 +85,7 @@ const subjectsByYearAndSemester = {
       'Internet of Things',
       'Data Engineering',
       'Information Technology Laboratory-VI',
+      'Project Stage 2'
     ]
   }
 };
@@ -102,6 +104,11 @@ const YearDetails = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [availableSubjects, setAvailableSubjects] = useState([]);
+  const [editingSemester, setEditingSemester] = useState(null);
+  const [editData, setEditData] = useState({
+    semester: '',
+    subjects: []
+  });
 
   useEffect(() => {
     if (!student || !student._id) {
@@ -266,6 +273,83 @@ const YearDetails = () => {
     navigate('/admin/academic');
   };
 
+  const handleEditSemester = (semester) => {
+    const semesterData = semesters[semester];
+    
+    if (!semesterData) {
+      toast.error('Semester data not found');
+      return;
+    }
+    
+    // Initialize edit form with current data
+    setEditData({
+      semester,
+      subjects: semesterData.map(subject => ({
+        name: subject.subject,
+        marks: subject.marks.toString()
+      }))
+    });
+    
+    setEditingSemester(semester);
+  };
+
+  const handleEditCancel = () => {
+    setEditingSemester(null);
+    setEditData({
+      semester: '',
+      subjects: []
+    });
+  };
+
+  const handleEditSubjectChange = (index, field, value) => {
+    const newSubjects = [...editData.subjects];
+    newSubjects[index][field] = value;
+    setEditData({ ...editData, subjects: newSubjects });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingSemester) return;
+    
+    // Validate marks
+    for (const subject of editData.subjects) {
+      if (subject.name.trim() === '' || !subject.marks || isNaN(Number(subject.marks))) {
+        toast.error('Please enter valid marks for all subjects');
+        return;
+      }
+    }
+    
+    setSubmitting(true);
+    try {
+      await adminApi.updateAcademicGrades({
+        studentId: student._id,
+        year,
+        semester: editingSemester,
+        grades: editData.subjects.map(s => ({ subject: s.name, marks: Number(s.marks) })),
+      });
+      
+      toast.success('Semester marks updated successfully');
+      
+      // Update local state
+      const updatedSemesters = {
+        ...semesters,
+        [editingSemester]: editData.subjects.map(s => ({ subject: s.name, marks: Number(s.marks) }))
+      };
+      setSemesters(updatedSemesters);
+      
+      // Reset editing state
+      setEditingSemester(null);
+      setEditData({
+        semester: '',
+        subjects: []
+      });
+    } catch (error) {
+      console.error('Error updating semester marks:', error);
+      toast.error('Failed to update semester marks');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   if (!student) {
     return (
       <div className="flex flex-col items-center justify-center py-16">
@@ -295,190 +379,245 @@ const YearDetails = () => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
-        <button
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-bold text-gray-900">Year {year} Details</h2>
+        <button 
           onClick={handleBack}
-          className="flex items-center text-gray-600 hover:text-indigo-600 transition-colors duration-200"
+          className="text-gray-600 hover:text-indigo-600 transition-colors flex items-center"
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
-          <span className="font-medium">Back to Academic Years</span>
+          <ArrowLeft className="h-5 w-5 mr-1" />
+          Back
         </button>
-        <div className="flex items-center space-x-3">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold">
-            {student?.name?.charAt(0) || 'S'}
-          </div>
-          <h2 className="text-lg font-bold text-gray-900">
-            {student?.name} - Year {(year).split("r")[1]}
-          </h2>
-        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white p-6">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center">
-            <BookOpen className="w-6 h-6 text-indigo-600 mr-2" />
-            Academic Semesters
-          </h2>
+      {student && (
+        <div className="bg-indigo-50 p-4 rounded-lg">
+          <p className="font-medium text-indigo-800">Selected Student: {student.name}</p>
+          <p className="text-sm text-indigo-600">Roll Number: {student.rollNumber}</p>
         </div>
-        <div className="p-6">
-          {Object.keys(semesters).length === 0 ? (
-            <div className="text-center py-8">
-              <div className="bg-gray-100 rounded-full p-3 w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                <BookOpen className="h-8 w-8 text-gray-500" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-1">No semesters added yet</h3>
-              <p className="text-gray-500 max-w-md mx-auto mb-6">
-                You can add semester details for this academic year below.
-              </p>
-            </div>
-          ) : (
+      )}
+
+      {/* Display existing semesters */}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
+        </div>
+      ) : (
+        <>
+          {Object.keys(semesters).length > 0 ? (
             <div className="space-y-6">
-              {Object.entries(semesters).map(([semesterKey, subjects]) => (
-                <div key={semesterKey} className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="bg-gray-50 flex items-center justify-between px-4 py-3 border-b border-gray-200">
-                    <h3 className="font-semibold text-gray-900">Semester {semesterKey.split("r")[1]}</h3>
-                    <button
-                      onClick={() => handleDeleteSemester(semesterKey)}
-                      className="text-gray-500 hover:text-red-600 p-1 rounded-full hover:bg-red-50 transition-colors"
-                      title="Delete Semester"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+              <h3 className="text-lg font-medium text-gray-900">Existing Semesters</h3>
+              
+              {Object.entries(semesters).map(([semesterKey, semesterSubjects]) => (
+                <div key={semesterKey} className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+                  <div className="flex justify-between items-center bg-gradient-to-r from-indigo-50 to-purple-50 px-5 py-3 border-b border-gray-100">
+                    <h4 className="text-lg font-medium text-gray-900">Semester {semesterKey}</h4>
+                    <div className="flex space-x-2">
+                      {editingSemester === semesterKey ? (
+                        <>
+                          <button
+                            onClick={handleSaveEdit}
+                            disabled={submitting}
+                            className="p-1.5 rounded-md text-green-600 hover:bg-green-50 transition-colors"
+                            title="Save changes"
+                          >
+                            <Check className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={handleEditCancel}
+                            className="p-1.5 rounded-md text-gray-500 hover:bg-gray-50 transition-colors"
+                            title="Cancel edit"
+                          >
+                            <X className="h-5 w-5" />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleEditSemester(semesterKey)}
+                            className="p-1.5 rounded-md text-indigo-600 hover:bg-indigo-50 transition-colors"
+                            title="Edit Semester"
+                          >
+                            <Edit className="h-5 w-5" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSemester(semesterKey)}
+                            className="p-1.5 rounded-md text-gray-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                            title="Delete Semester"
+                          >
+                            <Trash2 className="h-5 w-5" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="p-4">
-                    {subjects && subjects.length > 0 ? (
-                      <div className="overflow-hidden">
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <div className="grid grid-cols-2 font-semibold text-gray-500 text-sm mb-1">
-                            <span>Subject</span>
-                            <span className="text-right">Marks</span>
+                  
+                  <div className="p-5">
+                    {editingSemester === semesterKey ? (
+                      // Edit mode
+                      <div className="space-y-4">
+                        {editData.subjects.map((subject, index) => (
+                          <div key={index} className="flex flex-col md:flex-row md:items-center gap-3">
+                            <div className="flex-grow">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
+                              <input
+                                type="text"
+                                value={subject.name}
+                                onChange={(e) => handleEditSubjectChange(index, 'name', e.target.value)}
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                readOnly
+                              />
+                            </div>
+                            <div className="w-full md:w-32">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Marks</label>
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                value={subject.marks}
+                                onChange={(e) => handleEditSubjectChange(index, 'marks', e.target.value)}
+                                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                            </div>
                           </div>
-                          <div className="border-t border-gray-100 pt-2">
-                            {subjects.map((subject, idx) => (
-                              <div key={idx} className="grid grid-cols-2 py-1.5 text-sm hover:bg-gray-50 rounded-md px-2">
-                                <span className="text-gray-900">{subject.subject}</span>
-                                <span className="text-right font-medium text-indigo-600">{subject.marks}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                        ))}
                       </div>
                     ) : (
-                      <p className="text-gray-500 italic text-sm">No subjects available</p>
+                      // View mode
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marks</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {semesterSubjects.map((subject, idx) => (
+                              <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                                <td className="px-6 py-4 whitespace-normal text-sm text-gray-900">{subject.subject}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{subject.marks}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     )}
                   </div>
                 </div>
               ))}
             </div>
-          )}
-        </div>
-
-        {/* Add New Semester Form - Only show if there are available semesters */}
-        {/* {availableSemesters.length > 0 && (
-          <div className="border-t border-gray-200 pt-6">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Add New Semester</h3>
-              
-              <div className="max-w-md">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Select Semester</label>
-                <select
-                  value={formData.semester}
-                  onChange={(e) => setFormData({ ...formData, semester: e.target.value })}
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                >
-                  <option value="">-- Select Semester --</option>
-                  {availableSemesters.map((semNumber) => (
-                    <option key={semNumber} value={semNumber}>
-                      Semester {semNumber.split("r")[1]}
-                    </option>
-                  ))}
-                </select>
+          ) : (
+            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex flex-col items-center justify-center py-8">
+                <div className="bg-indigo-50 rounded-full p-4 mb-4">
+                  <BookOpen className="h-8 w-8 text-indigo-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Semesters Added Yet</h3>
+                <p className="text-gray-600 text-center max-w-md">
+                  Use the form below to add semester data for Year {year}.
+                </p>
               </div>
+            </div>
+          )}
+        </>
+      )}
 
+      {/* Add new semester form */}
+      {!loading && getAvailableSemesters().length > 0 && (
+        <div className="mt-6 p-6 border border-gray-200 rounded-lg shadow-sm bg-white">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Add New Semester</h3>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center gap-3">
+                <div className="flex-grow">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Semester</label>
+                  <select
+                    value={formData.semester}
+                    onChange={(e) => {
+                      setFormData({
+                        ...formData,
+                        semester: e.target.value,
+                        subjects: availableSubjects.map(subject => ({ name: subject, marks: '' }))
+                      });
+                    }}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <option value="">Select a semester</option>
+                    {getAvailableSemesters().map((semester) => (
+                      <option key={semester} value={semester}>Semester {semester}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               {formData.semester && (
                 <>
-                  <div className="mt-4">
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Add Subjects and Marks</h4>
-                    
-                    <div className="space-y-4 max-h-96 overflow-y-auto p-2">
-                      {formData.subjects.map((subject, index) => (
-                        <div key={index} className="flex space-x-4 items-center bg-gray-50 p-3 rounded-lg">
-                          <div className="flex-grow">
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Subject</label>
-                            <select
-                              value={subject.name}
-                              onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
-                              className="mt-1 block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
-                            >
-                              <option value="">-- Select Subject --</option>
-                              {availableSubjects.map((subj) => (
-                                <option key={subj} value={subj}>
-                                  {subj}
-                                </option>
-                              ))}
-                            </select>
-                          </div>
-                          
-                          <div className="w-24">
-                            <label className="block text-xs font-medium text-gray-500 mb-1">Marks</label>
-                            <input
-                              type="number"
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              value={subject.marks}
-                              onChange={(e) => handleSubjectChange(index, 'marks', e.target.value)}
-                              className="mt-1 block w-full border-gray-300 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                            />
-                          </div>
-                          
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveSubject(index)}
-                            className="mt-6 text-red-600 hover:text-red-800"
-                          >
-                            <Trash2 className="h-5 w-5" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    
+                  <div className="flex justify-between items-center mt-4 mb-2">
+                    <h4 className="font-medium text-gray-700">Subjects</h4>
                     <button
                       type="button"
                       onClick={handleAddSubject}
-                      className="mt-3 inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-800"
                     >
                       <Plus className="h-4 w-4 mr-1" />
-                      Add Another Subject
+                      Add Subject
                     </button>
                   </div>
                   
-                  <div className="pt-5 border-t border-gray-200">
-                    <div className="flex justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setFormData({ semester: '', subjects: [{ name: '', marks: '' }] })}
-                        className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mr-3"
-                      >
-                        Reset
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={submitting}
-                        className={`inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
-                          submitting ? 'opacity-70 cursor-not-allowed' : ''
-                        }`}
-                      >
-                        {submitting ? 'Saving...' : 'Save Semester Grades'}
-                      </button>
+                  {formData.subjects.map((subject, index) => (
+                    <div key={index} className="flex flex-col md:flex-row md:items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-grow">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Subject Name</label>
+                        <select
+                          value={subject.name}
+                          onChange={(e) => handleSubjectChange(index, 'name', e.target.value)}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        >
+                          <option value="">Select Subject</option>
+                          {availableSubjects.map((subjectName) => (
+                            <option key={subjectName} value={subjectName}>
+                              {subjectName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="w-full md:w-32">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Marks</label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={subject.marks}
+                          onChange={(e) => handleSubjectChange(index, 'marks', e.target.value)}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        />
+                      </div>
+                      <div className="flex items-end justify-center md:pt-6">
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveSubject(index)}
+                          className="text-red-500 hover:text-red-700 p-1"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </>
               )}
-            </form>
-          </div>
-        )} */}
-      </div>
+            </div>
+            {formData.semester && (
+              <button
+                type="submit"
+                disabled={submitting}
+                className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                {submitting ? 'Saving...' : 'Save Semester Data'}
+              </button>
+            )}
+          </form>
+        </div>
+      )}
     </div>
   );
 };
